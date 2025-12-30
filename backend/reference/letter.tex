@@ -1,0 +1,64 @@
+% !TEX encoding = UTF-8
+% !TEX program = pdflatex
+
+\documentclass[
+    version=last,      % Use the latest version of KOMA-Script
+    paper=a4,          % Paper size A4
+    fontsize=11pt,     % Font size
+    english,           % Language settings for English
+    fromalign=right,   % Sender address right-aligned
+    parskip=half       % Half a line of space between paragraphs, no indent
+]{scrlttr2}
+
+\usepackage[utf8]{inputenc} % Allows direct input of UTF-8 characters
+\usepackage[T1]{fontenc}    % Correct hyphenation for characters with accents
+\usepackage{babel}          % Language-specific typography (date, etc.)
+\usepackage[scaled]{helvet} % Use Helvetica as the sans-serif font
+\renewcommand\familydefault{\sfdefault} % Set sans-serif as the default font family
+\usepackage{lmodern}        % Modern font for better text quality
+\usepackage{graphicx}       % For including graphics (e.g., a scanned signature)
+\usepackage[normalem]{ulem} % Provides underline and strikethrough
+\usepackage{enumitem}       % For customizing lists
+\usepackage{hyperref}       % For creating hyperlinks in the PDF
+\hypersetup{colorlinks=true, linkcolor=black, urlcolor=black}
+
+% --- Sender Data ---
+% This data is displayed in the letterhead
+\setkomavar{fromname}{Your Name}
+\setkomavar{fromaddress}{Your Street 123 \\ 12345 Your City}
+
+% --- Date ---
+% \today automatically inserts the current date.
+% Alternatively, set a fixed date: \setkomavar{date}{June 28, 2025}
+\setkomavar{date}{\today}
+
+% --- Subject Line ---
+\setkomavar{subject}{Subject of the Letter}
+
+\begin{document}
+
+% --- Recipient Address ---
+% This will appear in the address field (suitable for windowed envelopes)
+\begin{letter}{
+    Recipient Name \\
+    Recipient Street 456 \\
+    54321 Recipient City
+}
+
+% --- Salutation ---
+\opening{Dear Recipient,}
+
+This is the main content of your letter. You can write multiple paragraphs here.
+
+This is a new paragraph, separated by a blank line in the source code. The `parskip=half` option ensures there is some vertical space between paragraphs.
+
+% --- Closing Formula ---
+\closing{Sincerely,}
+
+% --- Signature ---
+% This leaves space for a handwritten signature.
+% The name below it will be printed.
+\setkomavar{signature}{[Your Name]}
+
+\end{letter}
+\end{document}

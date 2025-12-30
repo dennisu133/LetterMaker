@@ -1,0 +1,123 @@
+{
+	"title": "LetterMaker",
+	"language": {
+		"tooltip": "Switch language",
+		"name": "English",
+		"flag": "🇺🇸",
+		"code": "en",
+		"dateLocale": "en-US"
+	},
+	"theme": {
+		"tooltip": "Toggle theme",
+		"light": "Light",
+		"dark": "Dark",
+		"system": "System"
+	},
+	"button": {
+		"stamp": "Upload Stamp",
+		"example": "Example",
+		"submit": "Submit",
+		"submitCooldown": "Wait {{seconds}}s",
+		"reset": "Reset"
+	},
+	"stamp": {
+		"title": "Upload Stamp",
+		"tooltip": "\"Ausdruck auf DIN A4 Normalpapier (Einlegeblatt)\" must have been selected during purchase.",
+		"success": {
+			"title": "Stamp uploaded successfully!",
+			"description": "Your Deutsche Post stamp has been verified and will be used for the letter."
+		},
+		"remove": "Remove stamp",
+		"drop": {
+			"title": "Drop stamp here",
+			"description": "PDF files only"
+		},
+		"error": {
+			"title": "Stamp validation failed",
+			"invalid_file": "Please upload a valid PDF file.",
+			"invalid_author": "This doesn't appear to be a valid Deutsche Post INTERNETMARKE stamp.",
+			"invalid_format": "Please use the \"Einlegeblatt\" (insert sheet) format, not the \"Ausdruck\" (cutout) version."
+		}
+	},
+	"form": {
+		"error": {
+			"title": "Submission Failed",
+			"NETWORK_ERROR": "Could not connect to the server. Please check your internet connection and try again.",
+			"RATELIMIT": "Too many requests. Please wait a moment before trying again.",
+			"VALIDATION_ERROR": "Please check your input and try again.",
+			"SERVER_ERROR": "An error occurred on the server. Please try again later.",
+			"BUSY": "The server is currently busy. Please wait a moment and try again.",
+			"TIMEOUT": "The request timed out. Please try again.",
+			"UNKNOWN": "An unexpected error occurred. Please try again."
+		}
+	},
+	"example": {
+		"senderName": "John Doe",
+		"senderAddress": "123 Example Street\nNew York, NY 10001",
+		"recipientName": "Receiver Inc.",
+		"recipientAddress": "456 Target Avenue\nParis, FR 75001",
+		"subject": "Example Subject\nfile number: 1234567890",
+		"salutation": "Dear Sir or Madam",
+		"content": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"This is an example text for the letter's content. You can insert and format your own text here.\"}]},{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"You can use \"},{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"bold text\"},{\"type\":\"text\",\"text\":\", \"},{\"type\":\"text\",\"marks\":[{\"type\":\"italic\"}],\"text\":\"italic text\"},{\"type\":\"text\",\"text\":\", and even lists:\"}]},{\"type\":\"bulletList\",\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Item 1\"}]}]},{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Item 2\"}]}]},{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Item 3\"}]}]}]},{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Everything you write here will be included in the PDF.\"}]}]}",
+		"closing": "Sincerely",
+		"signature": "John Doe"
+	},
+	"contact": {
+		"sender": "Sender",
+		"recipient": "Recipient",
+		"name": {
+			"label": "Name",
+			"placeholder": "Name or Company Name"
+		},
+		"address": {
+			"label": "Address",
+			"placeholder": "Street, House Number \nZip Code, City"
+		}
+	},
+	"content": {
+		"title": "Content",
+		"date": {
+			"label": "Date",
+			"placeholder": "Select date",
+			"format": "MM/dd/yyyy"
+		},
+		"subject": {
+			"label": "Subject",
+			"placeholder": "Enter subject"
+		},
+		"salutation": {
+			"label": "Salutation",
+			"list": ["Dear Sir or Madam", "Dear Ms.", "Dear Mr.", "Hello"],
+			"placeholder": "Select or write a salutation",
+			"none": "No salutations found.",
+			"tooltip": "Change salutation language",
+			"comma": "Toggle comma after salutation"
+		},
+		"editor": {
+			"bold": "Bold",
+			"italic": "Italic",
+			"underline": "Underline",
+			"strikethrough": "Strikethrough",
+			"bullet_list": "Bullet List",
+			"ordered_list": "Ordered List",
+			"blockquote": "Blockquote",
+			"remove_formatting": "Remove Formatting",
+			"placeholder": "Letter content",
+			"text_style": "Text Style",
+			"paragraph": "Paragraph",
+			"heading1": "Heading 1",
+			"heading2": "Heading 2",
+			"heading3": "Heading 3"
+		},
+		"closing": {
+			"label": "Closing",
+			"placeholder": "Select or write a closing",
+			"list": ["Sincerely", "Best regards", "Yours faithfully"],
+			"tooltip": "Change closing language"
+		},
+		"signature": {
+			"label": "Signature",
+			"placeholder": "Enter signature"
+		}
+	}
+}

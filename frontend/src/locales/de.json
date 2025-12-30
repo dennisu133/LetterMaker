@@ -1,0 +1,129 @@
+{
+	"title": "LetterMaker",
+	"language": {
+		"tooltip": "Sprache wechseln",
+		"name": "Deutsch",
+		"flag": "🇩🇪",
+		"code": "de",
+		"dateLocale": "de"
+	},
+	"theme": {
+		"tooltip": "Design umschalten",
+		"light": "Hell",
+		"dark": "Dunkel",
+		"system": "System"
+	},
+	"button": {
+		"stamp": "Briefmarke hochladen",
+		"example": "Beispiel",
+		"submit": "Absenden",
+		"submitCooldown": "Warte {{seconds}}s",
+		"reset": "Zurücksetzen"
+	},
+	"stamp": {
+		"title": "Briefmarke hochladen",
+		"tooltip": "Beim Kauf muss „Ausdruck auf DIN A4 Normalpapier (Einlegeblatt)“ ausgewählt worden sein.",
+		"success": {
+			"title": "Briefmarke erfolgreich hochgeladen!",
+			"description": "Ihre Deutsche Post Briefmarke wurde verifiziert und wird für den Brief verwendet."
+		},
+		"remove": "Briefmarke entfernen",
+		"drop": {
+			"title": "Briefmarke hier ablegen",
+			"description": "Nur PDF-Dateien"
+		},
+		"error": {
+			"title": "Briefmarken-Validierung fehlgeschlagen",
+			"invalid_file": "Bitte laden Sie eine gültige PDF-Datei hoch.",
+			"invalid_author": "Dies scheint keine gültige Deutsche Post INTERNETMARKE zu sein.",
+			"invalid_format": "Bitte verwenden Sie das \"Einlegeblatt\"-Format, nicht die \"Ausdruck\"-Version."
+		}
+	},
+	"form": {
+		"error": {
+			"title": "Übermittlung fehlgeschlagen",
+			"NETWORK_ERROR": "Verbindung zum Server konnte nicht hergestellt werden. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
+			"RATELIMIT": "Zu viele Anfragen. Bitte warten Sie einen Moment, bevor Sie es erneut versuchen.",
+			"VALIDATION_ERROR": "Bitte überprüfen Sie Ihre Eingaben und versuchen Sie es erneut.",
+			"SERVER_ERROR": "Auf dem Server ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
+			"BUSY": "Der Server ist derzeit ausgelastet. Bitte warten Sie einen Moment und versuchen Sie es erneut.",
+			"TIMEOUT": "Die Anfrage hat zu lange gedauert. Bitte versuchen Sie es erneut.",
+			"UNKNOWN": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut."
+		}
+	},
+	"example": {
+		"senderName": "Max Mustermann",
+		"senderAddress": "Musterstraße 1\n12345 Musterstadt",
+		"recipientName": "Beispiel GmbH",
+		"recipientAddress": "Hauptstraße 45\n10115 Berlin",
+		"subject": "Beispielbetreff\nAktenzeichen: 1234567890",
+		"salutation": "Sehr geehrte Damen und Herren",
+		"content": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Dies ist ein Beispieltext für den Briefinhalt. Sie können hier Ihren eigenen Text einfügen und formatieren.\"}]},{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Sie können \"},{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"fetten Text\"},{\"type\":\"text\",\"text\":\", \"},{\"type\":\"text\",\"marks\":[{\"type\":\"italic\"}],\"text\":\"kursiven Text\"},{\"type\":\"text\",\"text\":\" und sogar Listen verwenden:\"}]},{\"type\":\"bulletList\",\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Punkt 1\"}]}]},{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Punkt 2\"}]}]},{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Punkt 3\"}]}]}]},{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Alles, was Sie hier schreiben, wird in das PDF übernommen.\"}]}]}",
+		"closing": "Mit freundlichen Grüßen",
+		"signature": "Max Mustermann"
+	},
+	"contact": {
+		"sender": "Absender",
+		"recipient": "Empfänger",
+		"name": {
+			"label": "Name",
+			"placeholder": "Name oder Firmenname"
+		},
+		"address": {
+			"label": "Adresse",
+			"placeholder": "Straße, Hausnummer \nPLZ, Ort"
+		}
+	},
+	"content": {
+		"title": "Inhalt",
+		"date": {
+			"label": "Datum",
+			"placeholder": "Datum auswählen",
+			"format": "dd.MM.yyyy"
+		},
+		"subject": {
+			"label": "Betreff",
+			"placeholder": "Betreff eingeben"
+		},
+		"salutation": {
+			"label": "Anrede",
+			"list": [
+				"Sehr geehrte Damen und Herren",
+				"Sehr geehrte Frau",
+				"Sehr geehrter Herr",
+				"Guten Tag",
+				"Hallo"
+			],
+			"placeholder": "Anrede auswählen oder schreiben",
+			"none": "Keine Anreden gefunden.",
+			"tooltip": "Sprache der Anrede ändern",
+			"comma": "Komma nach der Anrede umschalten"
+		},
+		"editor": {
+			"bold": "Fett",
+			"italic": "Kursiv",
+			"underline": "Unterstrichen",
+			"strikethrough": "Durchgestrichen",
+			"bullet_list": "Aufzählung",
+			"ordered_list": "Nummerierte Liste",
+			"blockquote": "Zitat",
+			"remove_formatting": "Formatierung entfernen",
+			"placeholder": "Briefinhalt",
+			"text_style": "Textstil",
+			"paragraph": "Absatz",
+			"heading1": "Überschrift 1",
+			"heading2": "Überschrift 2",
+			"heading3": "Überschrift 3"
+		},
+		"closing": {
+			"label": "Grußformel",
+			"placeholder": "Grußformel auswählen oder schreiben",
+			"list": ["Mit freundlichen Grüßen", "Beste Grüße", "Hochachtungsvoll"],
+			"tooltip": "Sprache der Grußformel ändern"
+		},
+		"signature": {
+			"label": "Unterschrift",
+			"placeholder": "Unterschrift eingeben"
+		}
+	}
+}
