@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { MAX_CONTENT, MAX_INPUT, MAX_TEXT_AREA } from "@/lib/constants";
+import { parseLocalDate, todayLocalDate } from "@/lib/date";
 import { createDocFromText, extractPlainText, isValidProseMirrorDoc } from "@/lib/prosemirror";
 
 // Custom Zod validator for ProseMirror JSON content
@@ -59,7 +60,9 @@ export const proseMirrorContentSchema = z.string().superRefine((val, ctx) => {
 
 // Common fields for both modes
 const commonSchema = z.object({
-	date: z.string().min(1).max(10), // yyyy-mm-dd
+	date: z.string().refine((value) => parseLocalDate(value) !== undefined, {
+		message: "Please select a valid date"
+	}),
 	subject: z.string().min(1).max(MAX_TEXT_AREA),
 	salutation: z.string().max(MAX_INPUT).optional(),
 	salutationComma: z.boolean(),
@@ -98,7 +101,7 @@ export function createEmptyFormValues(): FormValues {
 	const emptyContentJson = JSON.stringify(createDocFromText(""));
 	return {
 		mode: "manual",
-		date: new Date().toISOString().split("T")[0],
+		date: todayLocalDate(),
 		subject: "",
 		salutation: "",
 		salutationComma: true,

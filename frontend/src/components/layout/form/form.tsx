@@ -12,6 +12,7 @@ import { ContentSection } from "@/components/layout/form/fields/editor";
 import { SubmissionProvider, useSubmission } from "@/components/submission-provider";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { openPdfInNewTab, submitLetter } from "@/lib/api";
+import { todayLocalDate } from "@/lib/date";
 import { createEmptyFormValues, formSchema, type FormValues } from "@/lib/formSchema";
 
 function StampSuccessCard() {
@@ -81,7 +82,7 @@ function LetterFormContent() {
 						{
 							mode: "stamp",
 							stampFile: stamp.file,
-							date: new Date().toISOString().split("T")[0],
+							date: todayLocalDate(),
 							subject: t("example.subject"),
 							salutation: t("example.salutation"),
 							salutationComma: true,
@@ -96,7 +97,7 @@ function LetterFormContent() {
 					form.reset(
 						{
 							mode: "manual",
-							date: new Date().toISOString().split("T")[0],
+							date: todayLocalDate(),
 							senderName: t("example.senderName"),
 							senderAddress: t("example.senderAddress"),
 							recipientName: t("example.recipientName"),
@@ -163,8 +164,8 @@ function LetterFormContent() {
 					<StampSuccessCard />
 				) : (
 					<div className="flex flex-col sm:flex-row">
-						<AddressSection role="sender" />
-						<AddressSection role="recipient" />
+						<AddressSection kind="sender" />
+						<AddressSection kind="recipient" />
 					</div>
 				)}
 

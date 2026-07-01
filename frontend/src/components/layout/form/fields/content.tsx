@@ -22,6 +22,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { dateLocales } from "@/i18n";
 import { MAX_INPUT, MAX_TEXT_AREA } from "@/lib/constants";
+import { formatLocalDate, parseLocalDate } from "@/lib/date";
 import { cn } from "@/lib/utils";
 
 const MAX_SUBJECT_LINES = 5;
@@ -64,8 +65,7 @@ export function DetailsSection() {
 						name="date"
 						control={control}
 						render={({ field, fieldState }) => {
-							// Parse the ISO date string to a Date object for the calendar
-							const dateValue = field.value ? new Date(field.value) : undefined;
+							const dateValue = parseLocalDate(field.value);
 							return (
 								<Popover open={dateOpen} onOpenChange={setDateOpen}>
 									<PopoverTrigger
@@ -94,8 +94,7 @@ export function DetailsSection() {
 											captionLayout="dropdown"
 											locale={currentLocale}
 											onSelect={(date) => {
-												// Store as ISO date string (YYYY-MM-DD)
-												field.onChange(date?.toISOString().split("T")[0] ?? "");
+												field.onChange(date ? formatLocalDate(date) : "");
 												setDateOpen(false);
 											}}
 										/>

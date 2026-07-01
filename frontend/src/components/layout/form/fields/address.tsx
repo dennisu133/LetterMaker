@@ -8,27 +8,27 @@ import { useTranslation } from "react-i18next";
 import { MAX_INPUT, MAX_TEXT_AREA } from "@/lib/constants";
 
 interface AddressSectionProps {
-	role: "sender" | "recipient";
+	kind: "sender" | "recipient";
 }
 
-export function AddressSection({ role }: AddressSectionProps) {
+export function AddressSection({ kind }: AddressSectionProps) {
 	const { t } = useTranslation();
 	const {
 		register,
 		formState: { errors }
 	} = useFormContext();
 
-	const nameField = `${role}Name` as const;
-	const addressField = `${role}Address` as const;
+	const nameField = `${kind}Name` as const;
+	const addressField = `${kind}Address` as const;
 
 	return (
 		<FieldSet className="mb-0 flex-1">
-			<FieldLegend>{t(`contact.${role}`)}</FieldLegend>
+			<FieldLegend>{t(`contact.${kind}`)}</FieldLegend>
 			<FieldGroup>
 				<Field>
 					<FieldLabel htmlFor={nameField}>
 						{t("contact.name.label")}
-						{role === "recipient" && "\u2009*"}
+						{kind === "recipient" && "\u2009*"}
 					</FieldLabel>
 					<Input
 						id={nameField}
@@ -42,7 +42,7 @@ export function AddressSection({ role }: AddressSectionProps) {
 				<Field>
 					<FieldLabel htmlFor={addressField}>
 						{t("contact.address.label")}
-						{role === "recipient" && "\u2009*"}
+						{kind === "recipient" && "\u2009*"}
 					</FieldLabel>
 					<Textarea
 						id={addressField}
