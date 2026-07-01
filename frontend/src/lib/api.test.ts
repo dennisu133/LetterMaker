@@ -30,9 +30,8 @@ describe("letter API", () => {
 	});
 
 	it("posts manual letters as multipart data and returns the PDF metadata", async () => {
-		const pdf = new Blob(["%PDF-1.4"], { type: "application/pdf" });
 		const fetchMock = vi.fn().mockResolvedValue(
-			new Response(pdf, {
+			new Response("%PDF-1.4", {
 				status: 200,
 				headers: {
 					"Content-Type": "application/pdf",
@@ -45,6 +44,10 @@ describe("letter API", () => {
 		const result = await submitLetter(manualPayload);
 
 		expect(result).toMatchObject({ success: true, filename: "application-letter.pdf" });
+		if (!result.success) {
+			throw new Error("Expected a successful PDF response");
+		}
+		await expect(result.pdf.text()).resolves.toBe("%PDF-1.4");
 		expect(fetchMock).toHaveBeenCalledOnce();
 		const [url, request] = fetchMock.mock.calls[0] as [string, RequestInit];
 		const body = request.body as FormData;
@@ -58,7 +61,7 @@ describe("letter API", () => {
 
 	it("includes the uploaded file in stamp mode and omits manual addresses", async () => {
 		const fetchMock = vi.fn().mockResolvedValue(
-			new Response(new Blob(["pdf"]), {
+			new Response("pdf", {
 				status: 200,
 				headers: { "Content-Type": "application/pdf" }
 			})
