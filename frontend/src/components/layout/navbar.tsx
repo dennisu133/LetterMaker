@@ -57,15 +57,11 @@ export function Navbar() {
 
 	return (
 		<nav className="w-full border-b px-4 py-2 sm:px-6">
-			<div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2">
+			<div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2 sm:flex sm:flex-wrap sm:gap-x-4">
 				<h1 className="shrink-0 text-xl font-bold">{t("title")}</h1>
 
-				<div className="flex grow items-center justify-between sm:justify-end sm:gap-4">
-					{/* Fluid scaling via linear interpolation:
-            - 0px gap at exactly 320px viewport width (10% of 320 - 32 = 0)
-            - Scales up to max 0.5rem (8px) at 400px viewport width
-          */}
-					<div className="flex gap-[clamp(0px,10vw-32px,0.5rem)]">
+				<div className="contents sm:flex sm:grow sm:items-center sm:justify-end sm:gap-4">
+					<div className="col-span-2 row-start-2 flex gap-2">
 						<input
 							ref={fileInputRef}
 							type="file"
@@ -120,7 +116,7 @@ export function Navbar() {
 
 					<Separator orientation="vertical" className="hidden sm:block" />
 
-					<div className="flex gap-[clamp(0px,10vw-32px,0.5rem)] sm:pl-0">
+					<div className="col-start-2 row-start-1 flex gap-2 justify-self-end">
 						<LanguageToggle />
 						<ThemeToggle />
 					</div>

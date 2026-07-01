@@ -103,10 +103,20 @@ test("has no automatically detectable accessibility violations", async ({ page }
 test("does not overflow the narrow mobile viewport", async ({ page }, testInfo) => {
 	test.skip(testInfo.project.name !== "narrow-mobile", "Only relevant to the narrow viewport");
 
-	const dimensions = await page.evaluate(() => ({
-		viewport: window.innerWidth,
-		document: document.documentElement.scrollWidth
-	}));
+	const expectNoHorizontalOverflow = async () => {
+		const dimensions = await page.evaluate(() => ({
+			viewport: document.documentElement.clientWidth,
+			document: document.documentElement.scrollWidth
+		}));
 
-	expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport);
+		expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport);
+	};
+
+	await expectNoHorizontalOverflow();
+
+	await page.getByRole("button", { name: "Switch language" }).click();
+	await page.getByRole("menuitem", { name: "🇩🇪 Deutsch" }).click();
+	await expect(page.getByRole("button", { name: "Briefmarke hochladen" })).toBeVisible();
+
+	await expectNoHorizontalOverflow();
 });
