@@ -198,7 +198,6 @@ export async function validateStamp(file: File): Promise<StampValidationResult> 
 
 		const doc = await getDocument({
 			data,
-			isEvalSupported: false,
 			disableFontFace: true
 		}).promise;
 

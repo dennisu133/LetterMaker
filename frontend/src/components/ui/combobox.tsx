@@ -305,13 +305,6 @@ function ComboboxFreeForm({
 		[controlledValue, onValueChange]
 	);
 
-	// Sync internal state with controlled value
-	React.useEffect(() => {
-		if (controlledValue !== undefined) {
-			setInternalValue(controlledValue);
-		}
-	}, [controlledValue]);
-
 	// For selection highlighting - if input matches an item exactly, show checkmark
 	const itemsArray = items as string[] | undefined;
 	const selectedValue = itemsArray?.includes(inputValue) ? inputValue : null;

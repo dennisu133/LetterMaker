@@ -330,7 +330,7 @@ interface TipTapEditorProps {
 }
 
 function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) {
-	const { t } = useTranslation();
+	const { i18n, t } = useTranslation();
 	const placeholder = t("content.editor.placeholder");
 	const editorLabel = t("content.editor.label");
 
@@ -339,13 +339,11 @@ function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) 
 	// Stable callback refs to avoid re-creating the editor
 	const onChangeRef = React.useRef(onChange);
 	const onBlurRef = React.useRef(onBlur);
-	const placeholderRef = React.useRef(placeholder);
 
 	// Keep refs up to date
 	React.useLayoutEffect(() => {
 		onChangeRef.current = onChange;
 		onBlurRef.current = onBlur;
-		placeholderRef.current = placeholder;
 	});
 
 	const getEditorAttributes = React.useCallback(
@@ -394,7 +392,7 @@ function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) 
 				limit: MAX_CONTENT
 			}),
 			Placeholder.configure({
-				placeholder: () => placeholderRef.current,
+				placeholder: () => i18n.t("content.editor.placeholder"),
 				emptyEditorClass: "is-editor-empty"
 			})
 		],

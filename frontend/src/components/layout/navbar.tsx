@@ -24,23 +24,10 @@ export function Navbar() {
 	const { stamp, uploadState, uploadStamp, clearStamp, clearError } = useStamp();
 
 	const fileInputRef = React.useRef<HTMLInputElement>(null);
-	const [popoverOpen, setPopoverOpen] = React.useState(false);
 	const [tooltipOpen, setTooltipOpen] = React.useState(false);
 
 	const isValidating = uploadState.status === "validating";
 	const hasError = uploadState.status === "error";
-
-	// Close tooltip when stamp state changes
-	React.useEffect(() => {
-		setTooltipOpen(false);
-	}, [stamp.isValid]);
-
-	// Open popover when error occurs
-	React.useEffect(() => {
-		if (hasError) {
-			setPopoverOpen(true);
-		}
-	}, [hasError]);
 
 	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
@@ -48,11 +35,13 @@ export function Navbar() {
 
 		// Reset file input so the same file can be selected again
 		e.target.value = "";
+		setTooltipOpen(false);
 
 		await uploadStamp(file);
 	};
 
 	const handleButtonClick = () => {
+		setTooltipOpen(false);
 		if (stamp.isValid) {
 			clearStamp();
 		} else if (!isValidating) {
@@ -61,7 +50,6 @@ export function Navbar() {
 	};
 
 	const handlePopoverOpenChange = (open: boolean) => {
-		setPopoverOpen(open);
 		if (!open && hasError) {
 			clearError();
 		}
@@ -89,7 +77,7 @@ export function Navbar() {
 							open={tooltipOpen && !stamp.isValid && !hasError}
 							onOpenChange={setTooltipOpen}
 						>
-							<Popover open={popoverOpen && hasError} onOpenChange={handlePopoverOpenChange}>
+							<Popover open={hasError} onOpenChange={handlePopoverOpenChange}>
 								<TooltipTrigger
 									render={
 										<PopoverTrigger

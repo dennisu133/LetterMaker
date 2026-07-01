@@ -43,8 +43,6 @@ export function ClosingSection() {
 	// Track whether signature is linked to senderName
 	const isSignatureLinkedRef = React.useRef(true);
 
-	const [popoverOpen, setPopoverOpen] = React.useState(false);
-
 	const { i18n, t } = useTranslation();
 	const { language: formalitiesLanguage } = useFormalities();
 
@@ -66,16 +64,9 @@ export function ClosingSection() {
 		return () => subscription.unsubscribe();
 	}, [watch, setValue]);
 
-	// Open popover when error occurs
 	const hasError = submissionState.error !== null;
-	React.useEffect(() => {
-		if (hasError) {
-			setPopoverOpen(true);
-		}
-	}, [hasError]);
 
 	const handlePopoverOpenChange = (open: boolean) => {
-		setPopoverOpen(open);
 		if (!open && hasError) {
 			clearError();
 		}
@@ -150,7 +141,7 @@ export function ClosingSection() {
 				</FieldError>
 			</Field>
 			<div className="flex flex-row justify-end gap-2 sm:w-auto">
-				<Popover open={popoverOpen && hasError} onOpenChange={handlePopoverOpenChange}>
+				<Popover open={hasError} onOpenChange={handlePopoverOpenChange}>
 					<PopoverTrigger
 						render={
 							<Button
