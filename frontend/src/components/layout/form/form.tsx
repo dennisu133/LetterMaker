@@ -19,7 +19,7 @@ function StampSuccessCard() {
 	const { t } = useTranslation();
 
 	return (
-		<Card className="m-4 border border-green-500/50 bg-green-50/50 dark:border-green-600/50 dark:bg-green-950/20">
+		<Card className="m-4 mb-0 border border-green-500/50 bg-green-50/50 dark:border-green-600/50 dark:bg-green-950/20">
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2 text-green-600 dark:text-green-500">
 					<CheckCircle className="size-5" />
