@@ -5,7 +5,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { Field } from "@/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Separator } from "@/components/ui/separator";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -331,18 +331,48 @@ interface TipTapEditorProps {
 
 function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) {
 	const { t } = useTranslation();
+	const placeholder = t("content.editor.placeholder");
+	const editorLabel = t("content.editor.label");
 
 	// Track the last value we sent to the form to avoid unnecessary syncs
 	const lastValueRef = React.useRef(value);
 	// Stable callback refs to avoid re-creating the editor
 	const onChangeRef = React.useRef(onChange);
 	const onBlurRef = React.useRef(onBlur);
+	const placeholderRef = React.useRef(placeholder);
 
 	// Keep refs up to date
 	React.useLayoutEffect(() => {
 		onChangeRef.current = onChange;
 		onBlurRef.current = onBlur;
+		placeholderRef.current = placeholder;
 	});
+
+	const getEditorAttributes = React.useCallback(
+		() => ({
+			class: cn(
+				"dark:bg-input/30 min-h-16 prose prose-sm dark:prose-invert max-w-none flex-1 px-2.5 py-2 text-xs outline-none",
+				"[&_h1]:text-xl [&_h1]:font-bold [&_h1]:leading-snug",
+				"[&_h2]:text-sm [&_h2]:font-bold [&_h2]:leading-snug",
+				"[&_h3]:text-xs [&_h3]:font-semibold [&_h3]:leading-snug",
+				"[&_ul]:list-disc [&_ul]:pl-4",
+				"[&_ol]:list-decimal [&_ol]:pl-4",
+				"[&_blockquote]:border-l-2 [&_blockquote]:border-muted-foreground [&_blockquote]:pl-3 [&_blockquote]:italic",
+				"[&_.is-editor-empty:first-child]:before:text-muted-foreground [&_.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_.is-editor-empty:first-child]:before:float-left [&_.is-editor-empty:first-child]:before:h-0 [&_.is-editor-empty:first-child]:before:pointer-events-none"
+			),
+			id: "content",
+			role: "textbox",
+			"aria-label": editorLabel,
+			"aria-multiline": "true",
+			...(hasError
+				? {
+						"aria-invalid": "true",
+						"aria-describedby": "content-error"
+					}
+				: {})
+		}),
+		[editorLabel, hasError]
+	);
 
 	// compute initial content
 	const initialContent = React.useMemo(() => {
@@ -364,25 +394,14 @@ function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) 
 				limit: MAX_CONTENT
 			}),
 			Placeholder.configure({
-				placeholder: t("content.editor.placeholder"),
+				placeholder: () => placeholderRef.current,
 				emptyEditorClass: "is-editor-empty"
 			})
 		],
 		content: initialContent,
 		immediatelyRender: true,
 		editorProps: {
-			attributes: {
-				class: cn(
-					"dark:bg-input/30 min-h-16 prose prose-sm dark:prose-invert max-w-none flex-1 px-2.5 py-2 text-xs outline-none",
-					"[&_h1]:text-xl [&_h1]:font-bold [&_h1]:leading-snug",
-					"[&_h2]:text-sm [&_h2]:font-bold [&_h2]:leading-snug",
-					"[&_h3]:text-xs [&_h3]:font-semibold [&_h3]:leading-snug",
-					"[&_ul]:list-disc [&_ul]:pl-4",
-					"[&_ol]:list-decimal [&_ol]:pl-4",
-					"[&_blockquote]:border-l-2 [&_blockquote]:border-muted-foreground [&_blockquote]:pl-3 [&_blockquote]:italic",
-					"[&_.is-editor-empty:first-child]:before:text-muted-foreground [&_.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_.is-editor-empty:first-child]:before:float-left [&_.is-editor-empty:first-child]:before:h-0 [&_.is-editor-empty:first-child]:before:pointer-events-none"
-				)
-			}
+			attributes: getEditorAttributes()
 		},
 		onUpdate: ({ editor }) => {
 			const json = JSON.stringify(editor.getJSON());
@@ -393,6 +412,17 @@ function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) 
 			onBlurRef.current();
 		}
 	});
+
+	React.useEffect(() => {
+		if (!editor) return;
+
+		editor.setOptions({
+			editorProps: {
+				attributes: getEditorAttributes()
+			}
+		});
+		editor.view.dispatch(editor.state.tr);
+	}, [editor, getEditorAttributes, placeholder]);
 
 	// Update editor content only when value changes externally (e.g., form reset)
 	React.useEffect(() => {
@@ -420,11 +450,7 @@ function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) 
 			)}
 		>
 			{editor && <EditorToolbar editor={editor} />}
-			<EditorContent
-				editor={editor}
-				className="flex flex-1 flex-col"
-				placeholder={t("content.editor.placeholder")}
-			/>
+			<EditorContent editor={editor} className="flex flex-1 flex-col" />
 		</div>
 	);
 }
@@ -439,7 +465,8 @@ export function ContentSection() {
 	const hasError = !!errors.content;
 
 	return (
-		<Field className="flex flex-1 flex-col gap-0" aria-label={t("content.editor.placeholder")}>
+		<Field className="flex flex-1 flex-col gap-1" data-invalid={hasError}>
+			<FieldLabel htmlFor="content">{t("content.editor.label") + "\u2009*"}</FieldLabel>
 			<Controller
 				name="content"
 				control={control}
@@ -452,6 +479,7 @@ export function ContentSection() {
 					/>
 				)}
 			/>
+			<FieldError id="content-error">{errors.content && t("form.validation.content")}</FieldError>
 		</Field>
 	);
 }

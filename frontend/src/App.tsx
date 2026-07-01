@@ -7,13 +7,8 @@ import { Navbar } from "@/components/layout/navbar";
 import { MetaTags } from "@/components/metadata";
 import { ThemeProvider } from "@/components/theme-provider.tsx";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
 
-import "./i18n";
-import "./index.css";
-
-function App() {
+export default function App() {
 	return (
 		<ThemeProvider>
 			<FormalitiesProvider>
@@ -30,11 +25,3 @@ function App() {
 		</ThemeProvider>
 	);
 }
-
-createRoot(document.getElementById("root")!).render(
-	<StrictMode>
-		<App />
-	</StrictMode>
-);
-
-export default App;

@@ -15,7 +15,14 @@ import {
 	ComboboxItem,
 	ComboboxList
 } from "@/components/ui/combobox";
-import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
+import {
+	Field,
+	FieldError,
+	FieldGroup,
+	FieldLabel,
+	FieldLegend,
+	FieldSet
+} from "@/components/ui/field";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
@@ -23,13 +30,17 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { dateLocales } from "@/i18n";
 import { MAX_INPUT, MAX_TEXT_AREA } from "@/lib/constants";
 import { formatLocalDate, parseLocalDate } from "@/lib/date";
+import type { FormValues } from "@/lib/formSchema";
 import { cn } from "@/lib/utils";
 
 const MAX_SUBJECT_LINES = 5;
 
 export function DetailsSection() {
 	const [dateOpen, setDateOpen] = React.useState(false);
-	const { control } = useFormContext();
+	const {
+		control,
+		formState: { errors }
+	} = useFormContext<FormValues>();
 
 	const { i18n, t } = useTranslation();
 	const { language: formalitiesLanguage } = useFormalities();
@@ -59,7 +70,7 @@ export function DetailsSection() {
 		<FieldSet className="mb-0 border-b-0">
 			<FieldLegend>{t("content.title")}</FieldLegend>
 			<FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-[2fr_5fr]">
-				<Field>
+				<Field data-invalid={!!errors.date}>
 					<FieldLabel htmlFor="date">{t("content.date.label") + "\u2009*"}</FieldLabel>
 					<Controller
 						name="date"
@@ -78,6 +89,8 @@ export function DetailsSection() {
 													"border-input hover:bg-input/30 w-full justify-between bg-transparent font-normal",
 													fieldState.error && "border-destructive focus-visible:ring-destructive"
 												)}
+												aria-invalid={!!fieldState.error}
+												aria-describedby={fieldState.error ? "date-error" : undefined}
 											>
 												{dateValue
 													? format(dateValue, dateFormat, { locale: currentLocale })
@@ -103,9 +116,10 @@ export function DetailsSection() {
 							);
 						}}
 					/>
+					<FieldError id="date-error">{errors.date && t("form.validation.date")}</FieldError>
 				</Field>
 
-				<Field>
+				<Field data-invalid={!!errors.subject}>
 					<FieldLabel htmlFor="subject">{t("content.subject.label") + "\u2009*"}</FieldLabel>
 					<Controller
 						name="subject"
@@ -118,6 +132,8 @@ export function DetailsSection() {
 								value={field.value}
 								onChange={(e) => field.onChange(limitSubjectLines(e.target.value))}
 								onBlur={field.onBlur}
+								aria-invalid={!!fieldState.error}
+								aria-describedby={fieldState.error ? "subject-error" : undefined}
 								className={cn(
 									"min-h-8 resize-none pt-1 pb-0.5",
 									fieldState.error && "border-destructive focus-visible:ring-destructive"
@@ -125,10 +141,13 @@ export function DetailsSection() {
 							/>
 						)}
 					/>
+					<FieldError id="subject-error">
+						{errors.subject && t("form.validation.subject")}
+					</FieldError>
 				</Field>
 			</FieldGroup>
 
-			<Field>
+			<Field data-invalid={!!errors.salutation}>
 				<FieldLabel htmlFor="salutation">{t("content.salutation.label")}</FieldLabel>
 				<div className="flex gap-2">
 					<Formalities tooltip="content.salutation.tooltip" />
@@ -151,6 +170,8 @@ export function DetailsSection() {
 									)}
 									onBlur={field.onBlur}
 									triggerAriaLabel={t("content.salutation.label")}
+									aria-invalid={!!fieldState.error}
+									aria-describedby={fieldState.error ? "salutation-error" : undefined}
 								/>
 								<ComboboxContent>
 									<ComboboxList>
@@ -188,6 +209,9 @@ export function DetailsSection() {
 						)}
 					/>
 				</div>
+				<FieldError id="salutation-error">
+					{errors.salutation && t("form.validation.salutation")}
+				</FieldError>
 			</Field>
 		</FieldSet>
 	);

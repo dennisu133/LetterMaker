@@ -15,7 +15,7 @@ import {
 	ComboboxItem,
 	ComboboxList
 } from "@/components/ui/combobox";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
 	Popover,
@@ -27,10 +27,17 @@ import {
 } from "@/components/ui/popover";
 import { Spinner } from "@/components/ui/spinner";
 import { MAX_INPUT, MAX_TEXT_AREA } from "@/lib/constants";
+import type { FormValues } from "@/lib/formSchema";
 import { cn } from "@/lib/utils";
 
 export function ClosingSection() {
-	const { control, watch, setValue, reset } = useFormContext();
+	const {
+		control,
+		watch,
+		setValue,
+		reset,
+		formState: { errors }
+	} = useFormContext<FormValues>();
 	const { clearStamp } = useStamp();
 	const { state: submissionState, clearError, canSubmit, cooldownSeconds } = useSubmission();
 	// Track whether signature is linked to senderName
@@ -52,7 +59,7 @@ export function ClosingSection() {
 	// Subscribe to senderName changes and sync to signature when linked
 	React.useEffect(() => {
 		const subscription = watch((value, { name }) => {
-			if (name === "senderName" && isSignatureLinkedRef.current) {
+			if (name === "senderName" && isSignatureLinkedRef.current && "senderName" in value) {
 				setValue("signature", value.senderName ?? "", { shouldDirty: false });
 			}
 		});
@@ -76,7 +83,7 @@ export function ClosingSection() {
 
 	return (
 		<FieldGroup className="grid grid-cols-1 items-end gap-4 sm:grid-cols-[3fr_2fr_auto]">
-			<Field aria-label={t("content.closing.label")}>
+			<Field data-invalid={!!errors.closing}>
 				<FieldLabel htmlFor="closing">{t("content.closing.label")}</FieldLabel>
 				<div className="flex gap-2">
 					<Formalities tooltip="content.closing.tooltip" />
@@ -95,6 +102,8 @@ export function ClosingSection() {
 									placeholder={t("content.closing.placeholder")}
 									onBlur={field.onBlur}
 									triggerAriaLabel={t("content.closing.label")}
+									aria-invalid={!!fieldState.error}
+									aria-describedby={fieldState.error ? "closing-error" : undefined}
 								/>
 								<ComboboxContent>
 									<ComboboxList>
@@ -109,8 +118,9 @@ export function ClosingSection() {
 						)}
 					/>
 				</div>
+				<FieldError id="closing-error">{errors.closing && t("form.validation.closing")}</FieldError>
 			</Field>
-			<Field aria-label={t("content.signature.label")}>
+			<Field data-invalid={!!errors.signature}>
 				<FieldLabel htmlFor="signature">{t("content.signature.label") + "\u2009*"}</FieldLabel>
 				<Controller
 					name="signature"
@@ -127,12 +137,17 @@ export function ClosingSection() {
 								field.onChange(e);
 							}}
 							onBlur={field.onBlur}
+							aria-invalid={!!fieldState.error}
+							aria-describedby={fieldState.error ? "signature-error" : undefined}
 							className={cn(
 								fieldState.error && "border-destructive focus-visible:ring-destructive"
 							)}
 						/>
 					)}
 				/>
+				<FieldError id="signature-error">
+					{errors.signature && t("form.validation.signature")}
+				</FieldError>
 			</Field>
 			<div className="flex flex-row justify-end gap-2 sm:w-auto">
 				<Popover open={popoverOpen && hasError} onOpenChange={handlePopoverOpenChange}>

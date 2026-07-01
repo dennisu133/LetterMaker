@@ -1,38 +1,11 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
-import { afterEach, vi } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
 
-class MemoryStorage implements Storage {
-	readonly #store = new Map<string, string>();
+import i18n from "@/i18n";
 
-	get length() {
-		return this.#store.size;
-	}
-
-	clear() {
-		this.#store.clear();
-	}
-
-	getItem(key: string) {
-		return this.#store.get(key) ?? null;
-	}
-
-	key(index: number) {
-		return [...this.#store.keys()][index] ?? null;
-	}
-
-	removeItem(key: string) {
-		this.#store.delete(key);
-	}
-
-	setItem(key: string, value: string) {
-		this.#store.set(key, String(value));
-	}
-}
-
-Object.defineProperty(window, "localStorage", {
-	configurable: true,
-	value: new MemoryStorage()
+beforeEach(async () => {
+	await i18n.changeLanguage("en");
 });
 
 afterEach(() => {
@@ -41,27 +14,3 @@ afterEach(() => {
 	document.documentElement.className = "";
 	vi.restoreAllMocks();
 });
-
-Object.defineProperty(window, "matchMedia", {
-	writable: true,
-	value: vi.fn().mockImplementation((query: string) => ({
-		matches: false,
-		media: query,
-		onchange: null,
-		addEventListener: vi.fn(),
-		removeEventListener: vi.fn(),
-		addListener: vi.fn(),
-		removeListener: vi.fn(),
-		dispatchEvent: vi.fn()
-	}))
-});
-
-class ResizeObserverMock implements ResizeObserver {
-	disconnect = vi.fn();
-	observe = vi.fn();
-	unobserve = vi.fn();
-}
-
-globalThis.ResizeObserver = ResizeObserverMock;
-
-Element.prototype.scrollIntoView = vi.fn();

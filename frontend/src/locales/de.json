@@ -40,6 +40,18 @@
 		}
 	},
 	"form": {
+		"validation": {
+			"senderName": "Der Absendername ist zu lang.",
+			"senderAddress": "Die Absenderadresse ist zu lang.",
+			"recipientName": "Geben Sie den Namen des Empfängers ein.",
+			"recipientAddress": "Geben Sie die Adresse des Empfängers ein.",
+			"date": "Wählen Sie ein gültiges Datum aus.",
+			"subject": "Geben Sie einen Betreff ein.",
+			"salutation": "Die Anrede ist zu lang.",
+			"content": "Schreiben Sie den Briefinhalt.",
+			"closing": "Die Grußformel ist zu lang.",
+			"signature": "Geben Sie eine Unterschrift ein."
+		},
 		"error": {
 			"title": "Übermittlung fehlgeschlagen",
 			"NETWORK_ERROR": "Verbindung zum Server konnte nicht hergestellt werden. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
@@ -100,6 +112,7 @@
 			"comma": "Komma nach der Anrede umschalten"
 		},
 		"editor": {
+			"label": "Briefinhalt",
 			"bold": "Fett",
 			"italic": "Kursiv",
 			"underline": "Unterstrichen",
@@ -108,7 +121,7 @@
 			"ordered_list": "Nummerierte Liste",
 			"blockquote": "Zitat",
 			"remove_formatting": "Formatierung entfernen",
-			"placeholder": "Briefinhalt",
+			"placeholder": "Beginnen Sie mit Ihrem Brief…",
 			"text_style": "Textstil",
 			"paragraph": "Absatz",
 			"heading1": "Überschrift 1",

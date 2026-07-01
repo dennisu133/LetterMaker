@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle } from "lucide-react";
 import * as React from "react";
-import { FormProvider, useForm, type FieldErrors } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useFormActionsRegister, useStamp } from "@/components/form-actions-provider";
@@ -41,17 +41,6 @@ function LetterFormContent() {
 		resolver: zodResolver(formSchema),
 		defaultValues: createEmptyFormValues()
 	});
-
-	// Log validation errors only on submit attempts
-	const logValidationErrors = React.useCallback((errors: FieldErrors<FormValues>) => {
-		if (Object.keys(errors).length > 0) {
-			console.group("Form Validation Errors");
-			Object.entries(errors).forEach(([field, error]) => {
-				console.warn(`${field}:`, error?.message ?? error);
-			});
-			console.groupEnd();
-		}
-	}, []);
 
 	// Sync form mode with stamp context
 	// When a stamp is uploaded via navbar, switch to stamp mode
@@ -149,12 +138,11 @@ function LetterFormContent() {
 		[setSubmitting, setError, recordSubmission, t]
 	);
 
-	// Handle form submission with validation error logging
 	const handleFormSubmit = React.useCallback(
 		(e: React.FormEvent<HTMLFormElement>) => {
-			form.handleSubmit(onSubmit, (errors) => logValidationErrors(errors))(e);
+			form.handleSubmit(onSubmit)(e);
 		},
-		[form, onSubmit, logValidationErrors]
+		[form, onSubmit]
 	);
 
 	return (

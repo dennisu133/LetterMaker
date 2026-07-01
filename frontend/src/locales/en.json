@@ -40,6 +40,18 @@
 		}
 	},
 	"form": {
+		"validation": {
+			"senderName": "The sender name is too long.",
+			"senderAddress": "The sender address is too long.",
+			"recipientName": "Enter the recipient's name.",
+			"recipientAddress": "Enter the recipient's address.",
+			"date": "Select a valid date.",
+			"subject": "Enter a subject.",
+			"salutation": "The salutation is too long.",
+			"content": "Write the letter content.",
+			"closing": "The closing is too long.",
+			"signature": "Enter a signature."
+		},
 		"error": {
 			"title": "Submission Failed",
 			"NETWORK_ERROR": "Could not connect to the server. Please check your internet connection and try again.",
@@ -94,6 +106,7 @@
 			"comma": "Toggle comma after salutation"
 		},
 		"editor": {
+			"label": "Letter content",
 			"bold": "Bold",
 			"italic": "Italic",
 			"underline": "Underline",
@@ -102,7 +115,7 @@
 			"ordered_list": "Ordered List",
 			"blockquote": "Blockquote",
 			"remove_formatting": "Remove Formatting",
-			"placeholder": "Letter content",
+			"placeholder": "Start writing your letter…",
 			"text_style": "Text Style",
 			"paragraph": "Paragraph",
 			"heading1": "Heading 1",
