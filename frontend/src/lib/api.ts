@@ -34,8 +34,7 @@ export type ErrorCode =
  * Result type for API calls
  */
 export type SubmitResult =
-	| { success: true; pdf: Blob; filename: string }
-	| { success: false; error: ErrorCode };
+	{ success: true; pdf: Blob; filename: string } | { success: false; error: ErrorCode };
 
 /**
  * Builds a FormData object from the form values.
@@ -170,7 +169,7 @@ export async function submitLetter(payload: SubmitLetterPayload): Promise<Submit
 		clearTimeout(timeoutId);
 
 		// Handle abort/timeout errors
-		if (err instanceof Error && err.name === "AbortError") {
+		if (typeof err === "object" && err !== null && "name" in err && err.name === "AbortError") {
 			console.error("[API Error]", `Request timed out after ${REQUEST_TIMEOUT_MS}ms`);
 			return { success: false, error: "TIMEOUT" };
 		}

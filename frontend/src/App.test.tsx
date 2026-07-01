@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import App from "@/App";
 import { openPdfInNewTab, submitLetter } from "@/lib/api";
+import { validateStamp } from "@/lib/validateStamp";
 
 vi.mock("@/lib/api", async (importOriginal) => {
 	const original = await importOriginal<typeof import("@/lib/api")>();
@@ -13,6 +14,10 @@ vi.mock("@/lib/api", async (importOriginal) => {
 		submitLetter: vi.fn()
 	};
 });
+
+vi.mock("@/lib/validateStamp", () => ({
+	validateStamp: vi.fn()
+}));
 
 describe("LetterMaker", () => {
 	it("shows accessible, localized errors for an incomplete letter", async () => {
@@ -98,5 +103,40 @@ describe("LetterMaker", () => {
 		);
 		expect(openPdfInNewTab).toHaveBeenCalledWith(pdf);
 		expect(await screen.findByRole("button", { name: "Wait 5s" })).toBeDisabled();
+	});
+
+	it("shows a clear error when an uploaded stamp is invalid", async () => {
+		const user = userEvent.setup();
+		const file = new File(["invalid"], "stamp.pdf", { type: "application/pdf" });
+		vi.mocked(validateStamp).mockResolvedValue({
+			valid: false,
+			error: "invalid_file"
+		});
+		render(<App />);
+
+		const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+		expect(input).not.toBeNull();
+		await user.upload(input!, file);
+
+		expect(await screen.findByText("Stamp validation failed")).toBeVisible();
+		expect(screen.getByText("Please upload a valid PDF file.")).toBeVisible();
+		expect(validateStamp).toHaveBeenCalledWith(file);
+	});
+
+	it("switches between stamp and manual address modes", async () => {
+		const user = userEvent.setup();
+		const file = new File(["valid"], "stamp.pdf", { type: "application/pdf" });
+		vi.mocked(validateStamp).mockResolvedValue({ valid: true, file });
+		render(<App />);
+
+		const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+		await user.upload(input!, file);
+
+		expect(await screen.findByText("Stamp uploaded successfully!")).toBeVisible();
+		expect(screen.queryByRole("group", { name: "Recipient" })).not.toBeInTheDocument();
+
+		await user.click(screen.getByRole("button", { name: "Remove stamp" }));
+
+		expect(screen.getByRole("group", { name: "Recipient" })).toBeVisible();
 	});
 });

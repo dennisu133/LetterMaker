@@ -1,5 +1,5 @@
 import i18n from "i18next";
-import { createContext, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 
 import { supportedLanguages } from "@/i18n";
 
@@ -15,12 +15,7 @@ type FormalitiesProviderState = {
 	setLanguage: (language: FormalitiesLanguage) => void;
 };
 
-const initialState: FormalitiesProviderState = {
-	language: "en",
-	setLanguage: () => null
-};
-
-const FormalitiesProviderContext = createContext<FormalitiesProviderState>(initialState);
+const FormalitiesProviderContext = createContext<FormalitiesProviderState | null>(null);
 
 // Get language from i18next, extracting base language code (e.g., "en-US" -> "en")
 const getLanguageFromI18n = (): FormalitiesLanguage => {
@@ -30,25 +25,26 @@ const getLanguageFromI18n = (): FormalitiesLanguage => {
 
 export function FormalitiesProvider({
 	children,
-	storageKey = "formalities-language",
-	...props
+	storageKey = "formalities-language"
 }: FormalitiesProviderProps) {
-	const [language, setLanguage] = useState<FormalitiesLanguage>(() => {
+	const [language, setLanguageState] = useState<FormalitiesLanguage>(() => {
 		// Prioritise localStorage if user manually changed it, otherwise use i18next's detected language
 		const stored = localStorage.getItem(storageKey);
 		return stored && supportedLanguages.includes(stored) ? stored : getLanguageFromI18n();
 	});
 
-	const value = {
-		language,
-		setLanguage: (language: FormalitiesLanguage) => {
+	const setLanguage = useCallback(
+		(language: FormalitiesLanguage) => {
 			localStorage.setItem(storageKey, language);
-			setLanguage(language);
-		}
-	};
+			setLanguageState(language);
+		},
+		[storageKey]
+	);
+
+	const value = useMemo(() => ({ language, setLanguage }), [language, setLanguage]);
 
 	return (
-		<FormalitiesProviderContext.Provider {...props} value={value}>
+		<FormalitiesProviderContext.Provider value={value}>
 			{children}
 		</FormalitiesProviderContext.Provider>
 	);
@@ -57,7 +53,7 @@ export function FormalitiesProvider({
 export const useFormalities = () => {
 	const context = useContext(FormalitiesProviderContext);
 
-	if (context === undefined) {
+	if (!context) {
 		throw new Error("useFormalities must be used within a FormalitiesProvider");
 	}
 
