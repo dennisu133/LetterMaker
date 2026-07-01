@@ -107,32 +107,26 @@ function LetterFormContent() {
 
 	const onSubmit = React.useCallback(
 		async (data: FormValues) => {
-			// Clear any previous errors and set submitting state
 			setSubmitting(true);
+			setError(null);
 
-			// Append comma to salutation if enabled and salutation is not empty
-			const salutation =
-				data.salutationComma && data.salutation ? `${data.salutation},` : data.salutation;
+			try {
+				const salutation =
+					data.salutationComma && data.salutation ? `${data.salutation},` : data.salutation;
+				const locale = t("language.dateLocale") as string;
+				const finalData = { ...data, salutation, locale };
+				delete (finalData as Record<string, unknown>).salutationComma;
 
-			// Get the current locale for date formatting from the i18n translation
-			const locale = t("language.dateLocale") as string;
+				const result = await submitLetter(finalData);
 
-			// Prepare final data with processed salutation and locale
-			const finalData = { ...data, salutation, locale };
-			delete (finalData as Record<string, unknown>).salutationComma;
-
-			// Submit to backend using multipart/form-data
-			const result = await submitLetter(finalData);
-
-			if (result.success) {
-				// Open the PDF in a new tab
-				openPdfInNewTab(result.pdf);
-				setError(null);
-				// Record successful submission for rate limiting
-				recordSubmission();
-			} else {
-				// Show error to user via popover
-				setError(result.error);
+				if (result.success) {
+					openPdfInNewTab(result.pdf);
+					recordSubmission();
+				} else {
+					setError(result.error);
+				}
+			} finally {
+				setSubmitting(false);
 			}
 		},
 		[setSubmitting, setError, recordSubmission, t]

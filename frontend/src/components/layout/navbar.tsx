@@ -68,7 +68,7 @@ export function Navbar() {
 	};
 
 	return (
-		<nav className="w-full border-b px-6 py-2">
+		<nav className="w-full border-b px-4 py-2 sm:px-6">
 			<div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2">
 				<h1 className="shrink-0 text-xl font-bold">{t("title")}</h1>
 
@@ -128,7 +128,7 @@ export function Navbar() {
 
 					<Separator orientation="vertical" className="hidden sm:block" />
 
-					<div className="flex gap-2 pl-2 sm:pl-0">
+					<div className="flex gap-2 sm:pl-0">
 						<LanguageToggle />
 						<ThemeToggle />
 					</div>

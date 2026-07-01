@@ -38,7 +38,7 @@ export function SubmissionProvider({ children }: { children: React.ReactNode }) 
 	}, []);
 
 	const setError = React.useCallback((error: ErrorCode | null) => {
-		setState((prev) => ({ ...prev, error, isSubmitting: false }));
+		setState((prev) => ({ ...prev, error }));
 	}, []);
 
 	const clearError = React.useCallback(() => {

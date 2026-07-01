@@ -14,14 +14,14 @@ interface RateLimitConfig {
 }
 
 interface RateLimitState {
-	/** Timestamp of last successful submission */
-	lastSubmissionTime: number | null;
 	/** Number of submissions in current escalation window */
 	submissionCount: number;
 	/** Current cooldown duration in ms */
 	currentCooldown: number;
 	/** Remaining cooldown time in ms (updates every second) */
 	cooldownRemaining: number;
+	/** Absolute deadline for the active cooldown */
+	cooldownEndsAt: number | null;
 }
 
 interface UseRateLimitReturn {
@@ -58,54 +58,38 @@ export function useRateLimit(config?: Partial<RateLimitConfig>): UseRateLimitRet
 	const options = React.useMemo(() => ({ ...DEFAULT_CONFIG, ...config }), [config]);
 
 	const [state, setState] = React.useState<RateLimitState>({
-		lastSubmissionTime: null,
 		submissionCount: 0,
 		currentCooldown: options.baseCooldown,
-		cooldownRemaining: 0
+		cooldownRemaining: 0,
+		cooldownEndsAt: null
 	});
 
-	// Timer ref for countdown updates
-	const timerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 	// Timer ref for escalation reset
 	const resetTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-	// Clean up timers on unmount
 	React.useEffect(() => {
 		return () => {
-			if (timerRef.current) clearInterval(timerRef.current);
 			if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
 		};
 	}, []);
 
-	// Start countdown timer
-	const startCountdown = React.useCallback((cooldownDuration: number) => {
-		// Clear any existing timer
-		if (timerRef.current) {
-			clearInterval(timerRef.current);
-		}
+	React.useEffect(() => {
+		if (state.cooldownEndsAt === null) return;
 
-		const endTime = Date.now() + cooldownDuration;
-
-		// Update immediately
-		setState((prev) => ({
-			...prev,
-			cooldownRemaining: cooldownDuration
-		}));
-
-		// Update every second
-		timerRef.current = setInterval(() => {
-			const remaining = Math.max(0, endTime - Date.now());
+		const timer = setInterval(() => {
 			setState((prev) => ({
 				...prev,
-				cooldownRemaining: remaining
+				cooldownRemaining:
+					prev.cooldownEndsAt === null ? 0 : Math.max(0, prev.cooldownEndsAt - Date.now()),
+				cooldownEndsAt:
+					prev.cooldownEndsAt !== null && prev.cooldownEndsAt <= Date.now()
+						? null
+						: prev.cooldownEndsAt
 			}));
+		}, 1000);
 
-			if (remaining <= 0 && timerRef.current) {
-				clearInterval(timerRef.current);
-				timerRef.current = null;
-			}
-		}, 100); // Update frequently for smooth countdown
-	}, []);
+		return () => clearInterval(timer);
+	}, [state.cooldownEndsAt]);
 
 	// Schedule escalation reset
 	const scheduleReset = React.useCallback(() => {
@@ -138,19 +122,11 @@ export function useRateLimit(config?: Partial<RateLimitConfig>): UseRateLimitRet
 			}
 
 			return {
-				lastSubmissionTime: Date.now(),
 				submissionCount: newCount,
 				currentCooldown: newCooldown,
-				cooldownRemaining: newCooldown
+				cooldownRemaining: newCooldown,
+				cooldownEndsAt: Date.now() + newCooldown
 			};
-		});
-
-		// Use a microtask to ensure state is updated before starting countdown
-		queueMicrotask(() => {
-			setState((current) => {
-				startCountdown(current.currentCooldown);
-				return current;
-			});
 		});
 
 		// Schedule reset of escalation after inactivity
@@ -159,7 +135,6 @@ export function useRateLimit(config?: Partial<RateLimitConfig>): UseRateLimitRet
 		options.escalationThreshold,
 		options.escalationMultiplier,
 		options.maxCooldown,
-		startCountdown,
 		scheduleReset
 	]);
 

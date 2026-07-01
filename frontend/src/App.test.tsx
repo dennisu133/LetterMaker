@@ -1,8 +1,18 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import App from "@/App";
+import { openPdfInNewTab, submitLetter } from "@/lib/api";
+
+vi.mock("@/lib/api", async (importOriginal) => {
+	const original = await importOriginal<typeof import("@/lib/api")>();
+	return {
+		...original,
+		openPdfInNewTab: vi.fn(),
+		submitLetter: vi.fn()
+	};
+});
 
 describe("LetterMaker", () => {
 	it("shows accessible, localized errors for an incomplete letter", async () => {
@@ -62,5 +72,31 @@ describe("LetterMaker", () => {
 		expect(within(recipientGroup).getByRole("textbox", { name: /Name/ })).toHaveValue("");
 		expect(screen.getByRole("textbox", { name: "Subject *" })).toHaveValue("");
 		expect(screen.getByRole("textbox", { name: "Letter content" })).toHaveTextContent("");
+	});
+
+	it("submits a complete letter, opens the PDF, and starts the cooldown", async () => {
+		const user = userEvent.setup();
+		const pdf = new Blob(["pdf"], { type: "application/pdf" });
+		vi.mocked(submitLetter).mockResolvedValue({
+			success: true,
+			pdf,
+			filename: "letter.pdf"
+		});
+		render(<App />);
+
+		await user.click(screen.getByRole("button", { name: "Example" }));
+		await user.click(screen.getByRole("button", { name: "Submit" }));
+
+		await waitFor(() => expect(submitLetter).toHaveBeenCalledOnce());
+		expect(submitLetter).toHaveBeenCalledWith(
+			expect.objectContaining({
+				mode: "manual",
+				locale: "en-US",
+				recipientName: "Receiver Inc.",
+				salutation: "Dear Sir or Madam,"
+			})
+		);
+		expect(openPdfInNewTab).toHaveBeenCalledWith(pdf);
+		expect(await screen.findByRole("button", { name: "Wait 5s" })).toBeDisabled();
 	});
 });
