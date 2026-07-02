@@ -94,64 +94,71 @@ func NewRouter(config Config) (*gin.Engine, error) {
 	return r, nil
 }
 
+// respondError sends a JSON error response matching the middleware error
+// shape ({error, code}) and aborts the request.
+func respondError(c *gin.Context, status int, code, message string) {
+	c.AbortWithStatusJSON(status, gin.H{"error": message, "code": code})
+}
+
 // handleCreateLetter returns a handler that processes letter creation requests.
 //
 // Pipeline steps:
 //  1. rate limiting (handled by middleware)                -> Error: 429
-//  2. payload validation                                   -> Error: 422
-//  3. parsing (prosemirror > latex)                        -> Error: 422
-//  4. semaphore acquisition                                -> Error: 503
-//  5. preparing (create temp dir with aux files)           -> Error: 500 / 507 / 508
-//  6. calling pdflatex (and merging stamp if provided)     -> Error: 500 / 408
-//  7. responding with the final PDF
+//  2. body size limit (handled by middleware)              -> Error: 413
+//  3. payload validation                                   -> Error: 422
+//  4. parsing (prosemirror > latex)                        -> Error: 422
+//  5. semaphore acquisition                                -> Error: 503
+//  6. preparing (create temp dir with aux files)           -> Error: 500
+//  7. calling pdflatex (and merging stamp if provided)     -> Error: 500 / 408
+//  8. responding with the final PDF
+//
+// Validation errors (422) carry the user-facing reason; internal failures
+// (500) return a generic message and the details stay in the server log.
 func handleCreateLetter(validator *pipeline.Validator, preparer *pipeline.Preparer, compiler letterCompiler, semaphore *pipeline.Semaphore) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Step 2: Bind and validate request
+		// Step 3: Bind and validate request
 		var req pipeline.LetterRequest
 		if err := c.ShouldBind(&req); err != nil {
 			var maxBytesErr *http.MaxBytesError
 			if errors.As(err, &maxBytesErr) {
 				log.Printf("[WARN] Request body too large (limit %d bytes)", maxBytesErr.Limit)
-				c.String(http.StatusRequestEntityTooLarge, "request body too large")
+				respondError(c, http.StatusRequestEntityTooLarge, "body_too_large", "Request body is too large.")
 				return
 			}
 			log.Printf("[ERROR] Failed to bind request: %v", err)
-			c.String(http.StatusUnprocessableEntity, err.Error())
+			respondError(c, http.StatusUnprocessableEntity, "invalid_request", "Malformed request payload.")
 			return
 		}
 
 		// Validate the request (including stamp file if present)
 		if err := validator.ValidateRequest(&req, c.FormFile); err != nil {
 			log.Printf("[ERROR] Validation failed: %v", err)
-			c.String(http.StatusUnprocessableEntity, err.Error())
+			respondError(c, http.StatusUnprocessableEntity, "validation_failed", err.Error())
 			return
 		}
 
-		// Step 3: Parse ProseMirror content to LaTeX
+		// Step 4: Parse ProseMirror content to LaTeX
 		contentLatex, err := pipeline.ParseProseMirrorToLatex(req.Content)
 		if err != nil {
 			log.Printf("[ERROR] ProseMirror parsing failed: %v", err)
-			c.String(http.StatusUnprocessableEntity, err.Error())
+			respondError(c, http.StatusUnprocessableEntity, "invalid_content", "Letter content could not be parsed.")
 			return
 		}
 
-		// Step 4: Acquire semaphore slot
+		// Step 5: Acquire semaphore slot
 		release, ok := semaphore.TryAcquire()
 		if !ok {
 			log.Printf("[WARN] Server busy, semaphore full")
-			c.AbortWithStatusJSON(http.StatusServiceUnavailable, gin.H{
-				"error": "Server is busy. Please try again in a moment.",
-				"code":  "server_busy",
-			})
+			respondError(c, http.StatusServiceUnavailable, "server_busy", "Server is busy. Please try again in a moment.")
 			return
 		}
 		defer release()
 
-		// Step 5: Prepare temp directory with LaTeX file
+		// Step 6: Prepare temp directory with LaTeX file
 		job, err := preparer.Prepare(&req, contentLatex)
 		if err != nil {
 			log.Printf("[ERROR] Prepare failed: %v", err)
-			c.String(http.StatusInternalServerError, err.Error())
+			respondError(c, http.StatusInternalServerError, "prepare_failed", "Failed to prepare the letter for compilation.")
 			return
 		}
 		defer func() {
@@ -160,11 +167,13 @@ func handleCreateLetter(validator *pipeline.Validator, preparer *pipeline.Prepar
 			}
 		}()
 
-		// Step 6: Compile PDF
+		// Step 7: Compile PDF
 		result, err := compiler.Compile(job)
 		if err != nil {
 			log.Printf("[ERROR] Compile failed: %v", err)
 			status := http.StatusInternalServerError
+			code := "compile_failed"
+			message := "Failed to compile the letter PDF."
 			if compileErr, ok := err.(pipeline.CompileError); ok {
 				// Log the full LaTeX output for debugging
 				if compileErr.Log != "" {
@@ -172,13 +181,15 @@ func handleCreateLetter(validator *pipeline.Validator, preparer *pipeline.Prepar
 				}
 				if compileErr.IsTimeout {
 					status = http.StatusRequestTimeout
+					code = "compile_timeout"
+					message = "PDF compilation timed out."
 				}
 			}
-			c.String(status, err.Error())
+			respondError(c, status, code, message)
 			return
 		}
 
-		// Step 7: Respond with PDF
+		// Step 8: Respond with PDF
 		c.Header("Content-Type", "application/pdf")
 		c.Header("Content-Disposition", "attachment; filename=letter.pdf")
 		c.Data(http.StatusOK, "application/pdf", result.PDF)
