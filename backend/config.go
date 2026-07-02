@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -8,6 +10,7 @@ import (
 
 	"lettermaker-backend/pipeline"
 
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
@@ -139,6 +142,66 @@ func LoadConfig() Config {
 // Addr returns the full address string for the server to listen on
 func (c Config) Addr() string {
 	return c.Host + ":" + c.Port
+}
+
+// Validate checks the configuration for values that would silently break
+// the service (e.g. a burst of 0 blocks every request forever).
+// It returns all problems found joined into a single error.
+func (c Config) Validate() error {
+	var errs []error
+
+	fail := func(format string, args ...any) {
+		errs = append(errs, fmt.Errorf(format, args...))
+	}
+
+	if port, err := strconv.Atoi(c.Port); err != nil || port < 1 || port > 65535 {
+		fail("PORT must be a number between 1 and 65535, got %q", c.Port)
+	}
+	if c.GinMode != gin.DebugMode && c.GinMode != gin.ReleaseMode && c.GinMode != gin.TestMode {
+		fail("GIN_MODE must be 'debug', 'release' or 'test', got %q", c.GinMode)
+	}
+
+	if c.RateLimit.RequestsPerSecond <= 0 {
+		fail("RATE_LIMIT_RPS must be positive, got %v", c.RateLimit.RequestsPerSecond)
+	}
+	if c.RateLimit.Burst < 1 {
+		fail("RATE_LIMIT_BURST must be at least 1 (0 would block all requests), got %d", c.RateLimit.Burst)
+	}
+	if c.RateLimit.EntryTTL <= 0 {
+		fail("RATE_LIMIT_TTL must be positive, got %v", c.RateLimit.EntryTTL)
+	}
+	if c.RateLimit.CleanupInterval <= 0 {
+		fail("RATE_LIMIT_CLEANUP must be positive, got %v", c.RateLimit.CleanupInterval)
+	}
+
+	if c.Validation.MaxInputLen < 1 {
+		fail("MAX_INPUT_LEN must be at least 1, got %d", c.Validation.MaxInputLen)
+	}
+	if c.Validation.MaxTextAreaLen < 1 {
+		fail("MAX_TEXT_AREA_LEN must be at least 1, got %d", c.Validation.MaxTextAreaLen)
+	}
+	if c.Validation.MaxContentLen < 1 {
+		fail("MAX_CONTENT_LEN must be at least 1, got %d", c.Validation.MaxContentLen)
+	}
+	if c.Validation.MinStampBytes < 0 {
+		fail("MIN_STAMP_BYTES must not be negative, got %d", c.Validation.MinStampBytes)
+	}
+	if c.Validation.MaxStampBytes <= c.Validation.MinStampBytes {
+		fail("MAX_STAMP_BYTES (%d) must be greater than MIN_STAMP_BYTES (%d)",
+			c.Validation.MaxStampBytes, c.Validation.MinStampBytes)
+	}
+
+	if c.Semaphore.MaxConcurrent < 1 {
+		fail("MAX_CONCURRENT_COMPILES must be at least 1, got %d", c.Semaphore.MaxConcurrent)
+	}
+	if c.Compiler.Timeout <= 0 {
+		fail("COMPILE_TIMEOUT must be positive, got %v", c.Compiler.Timeout)
+	}
+	if c.MaxRequestBytes < 1 {
+		fail("MAX_REQUEST_BYTES must be at least 1, got %d", c.MaxRequestBytes)
+	}
+
+	return errors.Join(errs...)
 }
 
 // getEnv returns the value of an environment variable or a default value
