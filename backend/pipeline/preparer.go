@@ -177,8 +177,6 @@ func (p *Preparer) generateLatex(req *LetterRequest, contentLatex string, hasSta
 \usepackage{graphicx}
 \usepackage[normalem]{ulem}
 \usepackage{enumitem}
-\usepackage{hyperref}
-\hypersetup{colorlinks=true, linkcolor=black, urlcolor=black}
 `)
 
 	// Add background package and stamp setup if stamp is present
@@ -186,7 +184,6 @@ func (p *Preparer) generateLatex(req *LetterRequest, contentLatex string, hasSta
 		sb.WriteString(`
 % Stamp overlay setup
 \usepackage{eso-pic}
-\usepackage{pdfpages}
 
 % Add stamp as background on first page only
 \AddToShipoutPictureBG*{%
@@ -247,13 +244,9 @@ func (p *Preparer) generateLatex(req *LetterRequest, contentLatex string, hasSta
 	sb.WriteString(contentLatex)
 	sb.WriteString("\n\n")
 
-	// Signature
+	// Signature (validation guarantees it is non-empty)
 	sb.WriteString(`\setkomavar{signature}{`)
-	signature := req.Signature
-	if signature == "" && !hasStamp {
-		signature = req.SenderName
-	}
-	sb.WriteString(EscapeLatexMultiline(signature))
+	sb.WriteString(EscapeLatexMultiline(req.Signature))
 	sb.WriteString("}\n\n")
 
 	// Closing

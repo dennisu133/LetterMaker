@@ -2,7 +2,6 @@ package pipeline
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -258,7 +257,9 @@ func (v *Validator) validateSignature(req *LetterRequest) error {
 	return nil
 }
 
-// validateContent validates the content field (ProseMirror JSON)
+// validateContent validates the content field (ProseMirror JSON).
+// Structural validation happens in ParseProseMirrorToLatex, which parses
+// the JSON anyway; duplicating the parse here would be wasted work.
 func (v *Validator) validateContent(req *LetterRequest) error {
 	req.Content = strings.TrimSpace(req.Content)
 
@@ -270,15 +271,6 @@ func (v *Validator) validateContent(req *LetterRequest) error {
 		return fmt.Errorf("content is too large (max %d characters)", v.cfg.MaxContentLen)
 	}
 
-	// Quick check before attempting full parse
-	if !looksLikeJSON(req.Content) {
-		return fmt.Errorf("content must be valid JSON")
-	}
-
-	var tmp any
-	if err := json.Unmarshal([]byte(req.Content), &tmp); err != nil {
-		return fmt.Errorf("content must be valid JSON")
-	}
 	return nil
 }
 
@@ -316,12 +308,6 @@ func (v *Validator) validateManualModeFields(req *LetterRequest) error {
 	}
 
 	return nil
-}
-
-// looksLikeJSON performs a quick check if a string appears to be JSON
-func looksLikeJSON(s string) bool {
-	s = strings.TrimSpace(s)
-	return strings.HasPrefix(s, "{") || strings.HasPrefix(s, "[")
 }
 
 // readMultipartFileLimited reads an uploaded multipart file with a strict size cap
