@@ -54,10 +54,12 @@ func NewRouter(config Config) (*gin.Engine, error) {
 	// Set CORS_ORIGINS="http://localhost:5173,https://yourdomain.com" for specific origins
 	if len(config.CORS.AllowedOrigins) > 0 {
 		corsConfig := cors.Config{
-			AllowMethods:     []string{"GET", "POST", "OPTIONS"},
-			AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
-			ExposeHeaders:    []string{"Content-Length", "Content-Disposition"},
-			AllowCredentials: true,
+			AllowMethods:  []string{"GET", "POST", "OPTIONS"},
+			AllowHeaders:  []string{"Origin", "Content-Type", "Accept"},
+			ExposeHeaders: []string{"Content-Length", "Content-Disposition"},
+			// The API uses no cookies or auth, so credentialed CORS is
+			// unnecessary surface (and invalid combined with a wildcard origin).
+			AllowCredentials: false,
 			MaxAge:           12 * time.Hour,
 		}
 
