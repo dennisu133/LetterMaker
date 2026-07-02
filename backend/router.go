@@ -64,8 +64,9 @@ func NewRouter(config Config) (*gin.Engine, error) {
 		log.Println("[INFO] CORS: Disabled")
 	}
 
-	// Apply rate limiting middleware
-	r.Use(pipeline.RateLimitMiddleware(config.RateLimit))
+	// Rate limiting only guards the expensive create route; keeping
+	// /api/health exempt so uptime monitors don't trip the limiter.
+	rateLimit := pipeline.RateLimitMiddleware(config.RateLimit)
 
 	// Create pipeline components with config
 	semaphore := pipeline.NewSemaphore(config.Semaphore)
@@ -74,7 +75,7 @@ func NewRouter(config Config) (*gin.Engine, error) {
 	compiler := pipeline.NewCompiler(config.Compiler)
 
 	// Routes
-	r.POST("/api/create", handleCreateLetter(validator, preparer, compiler, semaphore))
+	r.POST("/api/create", rateLimit, handleCreateLetter(validator, preparer, compiler, semaphore))
 	r.GET("/api/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
