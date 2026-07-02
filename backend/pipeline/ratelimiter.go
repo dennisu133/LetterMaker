@@ -1,9 +1,7 @@
 package pipeline
 
 import (
-	"net"
 	"net/http"
-	"strings"
 	"sync"
 	"time"
 
@@ -90,64 +88,18 @@ func (s *ipLimiterStore) cleanupLoop() {
 	}
 }
 
-// ClientIP extracts the best-effort real client IP for rate limiting.
-//
-// Priority (cascading for Cloudflare → nginx proxy manager setup):
-//  1. CF-Connecting-IP (Cloudflare)
-//  2. X-Forwarded-For (first value in the chain)
-//  3. X-Real-IP
-//  4. RemoteAddr
-func ClientIP(r *http.Request) string {
-	if r == nil {
-		return ""
-	}
-
-	// Cloudflare header - most reliable when using Cloudflare proxy
-	if ip := strings.TrimSpace(r.Header.Get("CF-Connecting-IP")); ip != "" {
-		if parsed := net.ParseIP(ip); parsed != nil {
-			return parsed.String()
-		}
-	}
-
-	// Standard proxy chain: client, proxy1, proxy2, ...
-	// Take the first (leftmost) IP which should be the original client
-	if xff := strings.TrimSpace(r.Header.Get("X-Forwarded-For")); xff != "" {
-		for part := range strings.SplitSeq(xff, ",") {
-			ip := strings.TrimSpace(part)
-			if parsed := net.ParseIP(ip); parsed != nil {
-				return parsed.String()
-			}
-			// Only check the first entry
-			break
-		}
-	}
-
-	// X-Real-IP is sometimes set by nginx
-	if xrip := strings.TrimSpace(r.Header.Get("X-Real-IP")); xrip != "" {
-		if parsed := net.ParseIP(xrip); parsed != nil {
-			return parsed.String()
-		}
-	}
-
-	// Fallback: RemoteAddr (ip:port)
-	host, _, err := net.SplitHostPort(strings.TrimSpace(r.RemoteAddr))
-	if err == nil {
-		if parsed := net.ParseIP(host); parsed != nil {
-			return parsed.String()
-		}
-	}
-
-	// Last resort: return whatever was in RemoteAddr
-	return strings.TrimSpace(r.RemoteAddr)
-}
-
 // RateLimitMiddleware creates a Gin middleware that enforces per-IP rate limiting.
 // If exceeded, responds with 429 Too Many Requests.
+//
+// The client IP comes from Gin's ClientIP, which only honors forwarding
+// headers (X-Forwarded-For, or the engine's TrustedPlatform header) when the
+// request arrives from a configured trusted proxy. Anything else would let
+// direct clients spoof arbitrary IPs and bypass rate limiting.
 func RateLimitMiddleware(cfg RateLimitConfig) gin.HandlerFunc {
 	store := newIPLimiterStore(cfg)
 
 	return func(c *gin.Context) {
-		ip := ClientIP(c.Request)
+		ip := c.ClientIP()
 		if ip == "" {
 			// No IP -> treat as suspicious, rate limit under "unknown" bucket
 			ip = "unknown"

@@ -23,6 +23,9 @@ type letterCompiler interface {
 func NewRouter(config Config) (*gin.Engine, error) {
 	r := gin.Default()
 
+	// Trust a platform-set client IP header (e.g. Cloudflare) if configured
+	r.TrustedPlatform = config.TrustedPlatform
+
 	// Set trusted proxies (nil means trust no proxies)
 	if len(config.TrustedProxies) == 0 {
 		if err := r.SetTrustedProxies(nil); err != nil {
