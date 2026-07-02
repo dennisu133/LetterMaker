@@ -2,7 +2,7 @@
 
 Backend for the LetterMaker application written in Go using [Gin](https://gin-gonic.com/).
 
-## Prerequesites
+## Prerequisites
 
 ### LaTeX
 
@@ -14,17 +14,38 @@ You will need pdfTeX and a few additional libraries ([see reference file for mor
 ## Endpoints
 
 - /api/create: the main route for PDF creation
-- /api/health: returns a simple 200. Use for debugging.
+- /api/health: returns a simple 200. Use for debugging and uptime monitoring (not rate limited).
 
-## Enviroment variables
+Errors are returned as JSON in the shape `{"error": "...", "code": "..."}`.
 
-The limits can be greatly configured using enviroment variables. The program uses [godotenv](https://github.com/joho/godotenv) to parse local .env files, even during production. Just make sure they are in the same directory as the binary.
+## Environment variables
 
-Simply rename [.env.example](/backend/.env.example) to .env and adjust the values if needed.
+The limits can be greatly configured using environment variables. The program uses [godotenv](https://github.com/joho/godotenv) to parse local .env files, even during production. Just make sure they are in the same directory as the binary.
+
+Simply rename [.env.example](/backend/.env.example) to .env and adjust the values if needed. The configuration is validated on startup; the server refuses to start if a value is broken (e.g. `RATE_LIMIT_BURST=0`).
+
+> [!IMPORTANT]
+> Client IPs for rate limiting are resolved through Gin's trusted-proxy handling. When running behind a reverse proxy, set `TRUSTED_PROXIES` to the proxy addresses; when behind Cloudflare, additionally set `TRUSTED_PLATFORM=cloudflare`. Forwarding headers from untrusted sources are ignored.
 
 ## Development
 
 Run using `go run .`. Make sure GIN_MODE is set to debug (default).
+
+## Testing
+
+Run the full suite (includes tests that invoke a real `pdflatex`):
+
+```sh
+go test ./...
+```
+
+Skip the pdflatex-dependent tests:
+
+```sh
+go test -short ./...
+```
+
+They are also skipped automatically when `pdflatex` is not installed. CI (see [backend.yml](/.github/workflows/backend.yml)) runs formatting, vet, module tidiness, the race-enabled test suite and the release build on every backend change.
 
 ## Build
 
