@@ -82,15 +82,17 @@ func NewCompiler(cfg CompilerConfig) *Compiler {
 }
 
 // Compile runs pdflatex on the prepared job and returns the generated PDF.
+// The compile timeout is layered on top of the given context, so pdflatex
+// is also killed when the caller cancels (e.g. the client disconnects).
 // The job's temporary directory should be cleaned up by the caller after
 // the PDF has been sent to the client.
-func (c *Compiler) Compile(job *PreparedJob) (*CompileResult, error) {
+func (c *Compiler) Compile(ctx context.Context, job *PreparedJob) (*CompileResult, error) {
 	if job == nil || job.TexFile == "" {
 		return nil, NewCompileError("invalid job: missing tex file", "")
 	}
 
-	// Create context with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), c.cfg.Timeout)
+	// Layer the compile timeout on top of the caller's context
+	ctx, cancel := context.WithTimeout(ctx, c.cfg.Timeout)
 	defer cancel()
 
 	// Get the directory and filename
