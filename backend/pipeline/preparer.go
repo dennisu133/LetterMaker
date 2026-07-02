@@ -6,8 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 // -----------------------------------------------------------------------------
@@ -110,12 +108,14 @@ func NewPreparer(cfg PreparerConfig) *Preparer {
 // Prepare creates a temporary directory with a LaTeX file ready for compilation.
 // Returns a PreparedJob that must be cleaned up after use (call Cleanup()).
 func (p *Preparer) Prepare(req *LetterRequest, contentLatex string) (*PreparedJob, error) {
-	// Create unique directory name using UUID
-	dirName := fmt.Sprintf("letter_%s_%d", uuid.New().String(), time.Now().UnixNano())
-	dirPath := filepath.Join(p.cfg.TmpDir, dirName)
-
 	// Ensure base tmp directory exists
-	if err := os.MkdirAll(dirPath, 0755); err != nil {
+	if err := os.MkdirAll(p.cfg.TmpDir, 0755); err != nil {
+		return nil, fmt.Errorf("failed to create base temp directory: %v", err)
+	}
+
+	// Create a unique job directory
+	dirPath, err := os.MkdirTemp(p.cfg.TmpDir, "letter_")
+	if err != nil {
 		return nil, fmt.Errorf("failed to create temp directory: %v", err)
 	}
 
