@@ -25,6 +25,11 @@ type Config struct {
 	Port           string
 	TrustedProxies []string
 
+	// TrustedPlatform is the header to take the client IP from when running
+	// behind a trusted hosting platform (e.g. Cloudflare's CF-Connecting-IP).
+	// Empty means no platform header is trusted.
+	TrustedPlatform string
+
 	// Gin mode: "debug", "release", or "test"
 	GinMode string
 
@@ -99,6 +104,23 @@ func LoadConfig() Config {
 				config.CORS.AllowedOrigins = append(config.CORS.AllowedOrigins, trimmed)
 			}
 		}
+	}
+
+	// Trusted platform header for client IPs. Only set this when the app is
+	// exclusively reachable through the named platform, since the header is
+	// trusted unconditionally.
+	switch platform := getEnv("TRUSTED_PLATFORM", ""); strings.ToLower(platform) {
+	case "", "none":
+		// no platform header trusted
+	case "cloudflare":
+		config.TrustedPlatform = "CF-Connecting-IP"
+	case "google-app-engine":
+		config.TrustedPlatform = "X-Appengine-Remote-Addr"
+	case "fly":
+		config.TrustedPlatform = "Fly-Client-IP"
+	default:
+		// treat as a literal header name (e.g. X-Real-IP set by nginx)
+		config.TrustedPlatform = platform
 	}
 
 	// Parse trusted proxies from comma-separated string
