@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,6 +12,16 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
+
+// maxBodySize caps the request body size. Once the limit is exceeded,
+// further body reads fail with *http.MaxBytesError and the connection is
+// closed, which the create handler surfaces as 413.
+func maxBodySize(limit int64) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, limit)
+		c.Next()
+	}
+}
 
 // letterCompiler compiles a prepared job into a PDF.
 // Satisfied by *pipeline.Compiler; an interface so tests can stub compilation.
@@ -75,7 +86,7 @@ func NewRouter(config Config) (*gin.Engine, error) {
 	compiler := pipeline.NewCompiler(config.Compiler)
 
 	// Routes
-	r.POST("/api/create", rateLimit, handleCreateLetter(validator, preparer, compiler, semaphore))
+	r.POST("/api/create", rateLimit, maxBodySize(config.MaxRequestBytes), handleCreateLetter(validator, preparer, compiler, semaphore))
 	r.GET("/api/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
@@ -98,6 +109,12 @@ func handleCreateLetter(validator *pipeline.Validator, preparer *pipeline.Prepar
 		// Step 2: Bind and validate request
 		var req pipeline.LetterRequest
 		if err := c.ShouldBind(&req); err != nil {
+			var maxBytesErr *http.MaxBytesError
+			if errors.As(err, &maxBytesErr) {
+				log.Printf("[WARN] Request body too large (limit %d bytes)", maxBytesErr.Limit)
+				c.String(http.StatusRequestEntityTooLarge, "request body too large")
+				return
+			}
 			log.Printf("[ERROR] Failed to bind request: %v", err)
 			c.String(http.StatusUnprocessableEntity, err.Error())
 			return
