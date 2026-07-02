@@ -17,6 +17,9 @@ func main() {
 	checkPdflatex()
 
 	config := LoadConfig()
+	if err := config.Validate(); err != nil {
+		log.Fatalf("Invalid configuration:\n%v", err)
+	}
 
 	// Set Gin mode before creating the engine
 	gin.SetMode(config.GinMode)
