@@ -15,7 +15,9 @@ const API_BASE_URL =
 			? "http://localhost:8080"
 			: "";
 const API_ENDPOINT = "/api/create";
-const REQUEST_TIMEOUT_MS = 30000; // 30 seconds
+// Must exceed the backend's COMPILE_TIMEOUT (30s) plus queueing overhead,
+// so slow compiles surface as a backend 408 instead of a client-side abort.
+const REQUEST_TIMEOUT_MS = 45000; // 45 seconds
 
 /**
  * Internal error codes derived from HTTP status codes.
@@ -103,13 +105,12 @@ function mapStatusToErrorCode(status: number): ErrorCode {
 	switch (status) {
 		case 429:
 			return "RATELIMIT";
+		case 413:
 		case 422:
 			return "VALIDATION_ERROR";
 		case 503:
 			return "BUSY";
 		case 500:
-		case 507:
-		case 508:
 			return "SERVER_ERROR";
 		case 408:
 			return "TIMEOUT";

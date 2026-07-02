@@ -83,6 +83,7 @@ describe("letter API", () => {
 
 	it.each([
 		[429, "RATELIMIT"],
+		[413, "VALIDATION_ERROR"],
 		[422, "VALIDATION_ERROR"],
 		[503, "BUSY"],
 		[500, "SERVER_ERROR"],
@@ -120,7 +121,7 @@ describe("letter API", () => {
 		);
 
 		const pending = submitLetter(manualPayload);
-		await vi.advanceTimersByTimeAsync(30_000);
+		await vi.advanceTimersByTimeAsync(45_000);
 
 		await expect(pending).resolves.toEqual({ success: false, error: "TIMEOUT" });
 	});
