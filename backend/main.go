@@ -69,20 +69,14 @@ func main() {
 	// Apply rate limiting middleware
 	r.Use(pipeline.RateLimitMiddleware(config.RateLimit))
 
-	// Initialize semaphore for concurrency limiting
-	pipeline.InitSemaphore(config.Semaphore)
-
-	// Create validator with config
+	// Create pipeline components with config
+	semaphore := pipeline.NewSemaphore(config.Semaphore)
 	validator := pipeline.NewValidator(config.Validation)
-
-	// Create preparer with config
 	preparer := pipeline.NewPreparer(config.Preparer)
-
-	// Create compiler with config
 	compiler := pipeline.NewCompiler(config.Compiler)
 
 	// Routes
-	r.POST("/api/create", handleCreateLetter(validator, preparer, compiler))
+	r.POST("/api/create", handleCreateLetter(validator, preparer, compiler, semaphore))
 	r.GET("/api/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
@@ -103,7 +97,7 @@ func main() {
 //  5. preparing (create temp dir with aux files)           -> Error: 500 / 507 / 508
 //  6. calling pdflatex (and merging stamp if provided)     -> Error: 500 / 408
 //  7. responding with the final PDF
-func handleCreateLetter(validator *pipeline.Validator, preparer *pipeline.Preparer, compiler *pipeline.Compiler) gin.HandlerFunc {
+func handleCreateLetter(validator *pipeline.Validator, preparer *pipeline.Preparer, compiler *pipeline.Compiler, semaphore *pipeline.Semaphore) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Step 2: Bind and validate request
 		var req pipeline.LetterRequest
@@ -129,10 +123,14 @@ func handleCreateLetter(validator *pipeline.Validator, preparer *pipeline.Prepar
 		}
 
 		// Step 4: Acquire semaphore slot
-		release, ok := pipeline.TryAcquireCompileSlot(c)
+		release, ok := semaphore.TryAcquire()
 		if !ok {
 			log.Printf("[WARN] Server busy, semaphore full")
-			return // 503 response already sent
+			c.AbortWithStatusJSON(http.StatusServiceUnavailable, gin.H{
+				"error": "Server is busy. Please try again in a moment.",
+				"code":  "server_busy",
+			})
+			return
 		}
 		defer release()
 
