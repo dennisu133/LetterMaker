@@ -104,14 +104,22 @@ func (c *Compiler) Compile(job *PreparedJob) (*CompileResult, error) {
 	// Build pdflatex command
 	// -interaction=nonstopmode: don't stop on errors, try to complete
 	// -halt-on-error: stop on first error (but don't wait for input)
+	// -no-shell-escape: forbid \write18 even where restricted shell escape
+	//   is enabled by default
 	// -output-directory: output files to the same directory
 	cmd := exec.CommandContext(ctx, "pdflatex",
 		"-interaction=nonstopmode",
 		"-halt-on-error",
+		"-no-shell-escape",
 		"-output-directory", dir,
 		texFilename,
 	)
 	cmd.Dir = dir
+
+	// Defense in depth: paranoid kpathsea file access, so even if an
+	// escaping bug slips through, TeX cannot read or write dotfiles,
+	// absolute paths or parent directories.
+	cmd.Env = append(os.Environ(), "openin_any=p", "openout_any=p")
 
 	// Capture stdout and stderr
 	var outputBuf bytes.Buffer
