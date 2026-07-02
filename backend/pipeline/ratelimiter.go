@@ -76,15 +76,18 @@ func (s *ipLimiterStore) cleanupLoop() {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		cutoff := time.Now().Add(-s.cfg.EntryTTL)
+		s.removeExpired(time.Now().Add(-s.cfg.EntryTTL))
+	}
+}
 
-		s.mu.Lock()
-		for ip, e := range s.entries {
-			if e.lastSeen.Before(cutoff) {
-				delete(s.entries, ip)
-			}
+// removeExpired deletes all entries last seen before the cutoff
+func (s *ipLimiterStore) removeExpired(cutoff time.Time) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for ip, e := range s.entries {
+		if e.lastSeen.Before(cutoff) {
+			delete(s.entries, ip)
 		}
-		s.mu.Unlock()
 	}
 }
 
