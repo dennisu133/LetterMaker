@@ -48,6 +48,7 @@ jobs:
             texlive-latex-extra \
             texlive-fonts-recommended \
             texlive-lang-german \
+            texlive-plain-generic \
             lmodern
 
       - name: Run tests

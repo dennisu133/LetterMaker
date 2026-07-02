@@ -43,6 +43,9 @@ func TestCompileProducesPDF(t *testing.T) {
 	c := NewCompiler(CompilerConfig{Timeout: 60 * time.Second})
 	result, err := c.Compile(context.Background(), prepareTestJob(t))
 	if err != nil {
+		if compileErr, ok := err.(CompileError); ok && compileErr.Log != "" {
+			t.Fatalf("compile failed: %v\npdflatex log:\n%s", err, compileErr.Log)
+		}
 		t.Fatalf("compile failed: %v", err)
 	}
 	if !bytes.HasPrefix(result.PDF, []byte("%PDF-")) {
