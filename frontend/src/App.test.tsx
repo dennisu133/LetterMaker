@@ -27,7 +27,7 @@ describe("LetterMaker", () => {
 		await user.click(screen.getByRole("button", { name: "Submit" }));
 
 		const recipientName = screen.getByRole("textbox", { name: /Name.*\*/ });
-		const editor = screen.getByRole("textbox", { name: "Letter content" });
+		const editor = await screen.findByRole("textbox", { name: "Letter content" });
 
 		expect(await screen.findByText("Enter the recipient's name.")).toBeVisible();
 		expect(screen.getByText("Enter the recipient's address.")).toBeVisible();

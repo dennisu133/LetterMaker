@@ -1,4 +1,3 @@
-import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import * as React from "react";
 import { Controller, useFormContext } from "react-hook-form";
@@ -7,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { Formalities } from "@/components/common/formalities";
 import { useFormalities } from "@/components/formalities-provider";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
 	ComboboxContent,
 	ComboboxFreeForm,
@@ -27,13 +25,17 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { dateLocales } from "@/i18n";
 import { MAX_INPUT, MAX_TEXT_AREA } from "@/lib/constants";
 import { formatLocalDate, parseLocalDate } from "@/lib/date";
 import type { FormValues } from "@/lib/formSchema";
 import { cn } from "@/lib/utils";
 
 const MAX_SUBJECT_LINES = 5;
+
+const Calendar = React.lazy(async () => {
+	const module = await import("@/components/ui/localized-calendar");
+	return { default: module.LocalizedCalendar };
+});
 
 export function DetailsSection() {
 	const [dateOpen, setDateOpen] = React.useState(false);
@@ -45,9 +47,15 @@ export function DetailsSection() {
 	const { i18n, t } = useTranslation();
 	const { language: formalitiesLanguage } = useFormalities();
 
-	// Get the current locale for date-fns
-	const currentLocale = dateLocales[i18n.language];
-	const dateFormat = t("content.date.format");
+	const dateFormatter = React.useMemo(
+		() =>
+			new Intl.DateTimeFormat(i18n.resolvedLanguage ?? i18n.language, {
+				day: "2-digit",
+				month: "2-digit",
+				year: "numeric"
+			}),
+		[i18n.language, i18n.resolvedLanguage]
+	);
 
 	// Get salutations from the formalities language locale
 	const salutations = React.useMemo(() => {
@@ -93,24 +101,25 @@ export function DetailsSection() {
 												aria-describedby={fieldState.error ? "date-error" : undefined}
 											>
 												{dateValue
-													? format(dateValue, dateFormat, { locale: currentLocale })
+													? dateFormatter.format(dateValue)
 													: t("content.date.placeholder")}
 												<CalendarIcon />
 											</Button>
 										)}
 									/>
 									<PopoverContent className="w-auto overflow-hidden p-0" align="start">
-										<Calendar
-											mode="single"
-											className="bg-input"
-											selected={dateValue}
-											captionLayout="dropdown"
-											locale={currentLocale}
-											onSelect={(date) => {
-												field.onChange(date ? formatLocalDate(date) : "");
-												setDateOpen(false);
-											}}
-										/>
+										<React.Suspense fallback={<div className="size-72" aria-hidden="true" />}>
+											<Calendar
+												mode="single"
+												className="bg-input"
+												selected={dateValue}
+												captionLayout="dropdown"
+												onSelect={(date) => {
+													field.onChange(date ? formatLocalDate(date) : "");
+													setDateOpen(false);
+												}}
+											/>
+										</React.Suspense>
 									</PopoverContent>
 								</Popover>
 							);

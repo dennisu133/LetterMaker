@@ -1,13 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { MAX_CONTENT } from "@/lib/constants";
-import {
-	createEmptyFormValues,
-	formSchema,
-	manualSchema,
-	proseMirrorContentSchema,
-	stampSchema
-} from "@/lib/formSchema";
+import { createEmptyFormValues } from "@/lib/formDefaults";
+import { formSchema, manualSchema, proseMirrorContentSchema, stampSchema } from "@/lib/formSchema";
 import { createDocFromText } from "@/lib/prosemirror";
 
 const content = JSON.stringify(createDocFromText("A complete letter."));
