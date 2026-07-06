@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 import { MAX_CONTENT, MAX_INPUT, MAX_TEXT_AREA } from "@/lib/constants";
-import { parseLocalDate, todayLocalDate } from "@/lib/date";
-import { createDocFromText, extractPlainText, isValidProseMirrorDoc } from "@/lib/prosemirror";
+import { parseLocalDate } from "@/lib/date";
+import { extractPlainText, isValidProseMirrorDoc } from "@/lib/prosemirror";
 
 // Custom Zod validator for ProseMirror JSON content
 export const proseMirrorContentSchema = z.string().superRefine((val, ctx) => {
@@ -95,22 +95,3 @@ export type ManualFormValues = z.infer<typeof manualSchema>;
 
 // Type for stamp mode values
 export type StampFormValues = z.infer<typeof stampSchema>;
-
-// Helper to create empty form default values
-export function createEmptyFormValues(): FormValues {
-	const emptyContentJson = JSON.stringify(createDocFromText(""));
-	return {
-		mode: "manual",
-		date: todayLocalDate(),
-		subject: "",
-		salutation: "",
-		salutationComma: true,
-		content: emptyContentJson,
-		closing: "",
-		signature: "",
-		senderName: "",
-		senderAddress: "",
-		recipientName: "",
-		recipientAddress: ""
-	};
-}

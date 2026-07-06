@@ -1,19 +1,52 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle } from "lucide-react";
 import * as React from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, type Resolver } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useFormActionsRegister, useStamp } from "@/components/form-actions-provider";
 import { AddressSection } from "@/components/layout/form/fields/address";
 import { ClosingSection } from "@/components/layout/form/fields/closing";
 import { DetailsSection } from "@/components/layout/form/fields/content";
-import { ContentSection } from "@/components/layout/form/fields/editor";
+import { ContentSectionSkeleton } from "@/components/layout/form/fields/editor-skeleton";
 import { SubmissionProvider, useSubmission } from "@/components/submission-provider";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { openPdfInNewTab, submitLetter } from "@/lib/api";
 import { todayLocalDate } from "@/lib/date";
-import { createEmptyFormValues, formSchema, type FormValues } from "@/lib/formSchema";
+import { createEmptyFormValues } from "@/lib/formDefaults";
+import type { FormValues } from "@/lib/formSchema";
+
+const lazyFormResolver: Resolver<FormValues> = async (values, context, options) => {
+	const [{ zodResolver }, { formSchema }] = await Promise.all([
+		import("@hookform/resolvers/zod"),
+		import("@/lib/formSchema")
+	]);
+
+	return zodResolver(formSchema)(values, context, options);
+};
+
+// Fetch the validation chunks once the browser is idle so the first submit
+// doesn't have to wait for them.
+function useWarmFormResolver() {
+	React.useEffect(() => {
+		const warmUp = () => {
+			void import("@hookform/resolvers/zod");
+			void import("@/lib/formSchema");
+		};
+
+		if ("requestIdleCallback" in window) {
+			const id = requestIdleCallback(warmUp);
+			return () => cancelIdleCallback(id);
+		}
+
+		const id = setTimeout(warmUp, 2000);
+		return () => clearTimeout(id);
+	}, []);
+}
+
+const ContentSection = React.lazy(async () => {
+	const module = await import("@/components/layout/form/fields/editor");
+	return { default: module.ContentSection };
+});
 
 function StampSuccessCard() {
 	const { t } = useTranslation();
@@ -38,9 +71,11 @@ function LetterFormContent() {
 	const { setSubmitting, setError, recordSubmission } = useSubmission();
 
 	const form = useForm<FormValues>({
-		resolver: zodResolver(formSchema),
+		resolver: lazyFormResolver,
 		defaultValues: createEmptyFormValues()
 	});
+
+	useWarmFormResolver();
 
 	// Sync form mode with stamp context
 	// When a stamp is uploaded via navbar, switch to stamp mode
@@ -154,7 +189,9 @@ function LetterFormContent() {
 				<DetailsSection />
 
 				<div className="bg-card mx-4 mb-4 flex flex-1 flex-col gap-4 border border-t-0 p-4">
-					<ContentSection />
+					<React.Suspense fallback={<ContentSectionSkeleton />}>
+						<ContentSection />
+					</React.Suspense>
 					<ClosingSection />
 				</div>
 			</form>

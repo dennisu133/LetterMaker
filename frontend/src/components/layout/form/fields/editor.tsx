@@ -1,3 +1,11 @@
+import {
+	toolbarChevronClass,
+	toolbarClass,
+	toolbarDropdownButtonClass,
+	toolbarIconClass,
+	toolbarSeparatorClass,
+	toolbarSquareButtonClass
+} from "@/components/layout/form/fields/editor-skeleton";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -111,11 +119,9 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 
 	const currentHeading = getCurrentHeadingLabel();
 	const CurrentIcon = currentHeading.icon;
-	const separatorClass =
-		"mx-[clamp(0,0.0625vw,0.125rem)] my-auto h-[clamp(1.25rem,1rem+0.75vw,1.5rem)]";
 
 	return (
-		<div className="border-input flex flex-wrap items-center gap-1 border-b p-1">
+		<div className={toolbarClass}>
 			{/* Heading Dropdown */}
 			<DropdownMenu>
 				<Tooltip>
@@ -126,11 +132,11 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 									<Button
 										variant="ghost"
 										size="sm"
-										className="h-[clamp(1.5rem,1.25rem+0.75vw,1.75rem)] gap-1 px-[clamp(0.25rem,0.125rem+0.375vw,0.5rem)]"
+										className={toolbarDropdownButtonClass}
 										aria-label={t("content.editor.text_style")}
 									>
-										<CurrentIcon className="size-[clamp(0.875rem,0.75rem+0.375vw,1rem)]" />
-										<ChevronDown className="size-[clamp(0.625rem,0.5rem+0.375vw,0.75rem)]" />
+										<CurrentIcon className={toolbarIconClass} />
+										<ChevronDown className={toolbarChevronClass} />
 									</Button>
 								}
 							/>
@@ -160,7 +166,7 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 				</DropdownMenuContent>
 			</DropdownMenu>
 
-			<Separator orientation="vertical" className={separatorClass} />
+			<Separator orientation="vertical" className={toolbarSeparatorClass} />
 
 			{/* Bold */}
 			<Tooltip>
@@ -174,7 +180,7 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 						/>
 					}
 				>
-					<Bold className="size-[clamp(0.875rem,0.75rem+0.375vw,1rem)]" />
+					<Bold className={toolbarIconClass} />
 				</TooltipTrigger>
 				<TooltipContent>
 					<p>{t("content.editor.bold")}</p>
@@ -193,7 +199,7 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 						/>
 					}
 				>
-					<Italic className="size-[clamp(0.875rem,0.75rem+0.375vw,1rem)]" />
+					<Italic className={toolbarIconClass} />
 				</TooltipTrigger>
 				<TooltipContent>
 					<p>{t("content.editor.italic")}</p>
@@ -212,7 +218,7 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 						/>
 					}
 				>
-					<UnderlineIcon className="size-[clamp(0.875rem,0.75rem+0.375vw,1rem)]" />
+					<UnderlineIcon className={toolbarIconClass} />
 				</TooltipTrigger>
 				<TooltipContent>
 					<p>{t("content.editor.underline")}</p>
@@ -231,14 +237,14 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 						/>
 					}
 				>
-					<Strikethrough className="size-[clamp(0.875rem,0.75rem+0.375vw,1rem)]" />
+					<Strikethrough className={toolbarIconClass} />
 				</TooltipTrigger>
 				<TooltipContent>
 					<p>{t("content.editor.strikethrough")}</p>
 				</TooltipContent>
 			</Tooltip>
 
-			<Separator orientation="vertical" className={separatorClass} />
+			<Separator orientation="vertical" className={toolbarSeparatorClass} />
 
 			{/* Bullet List */}
 			<Tooltip>
@@ -252,7 +258,7 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 						/>
 					}
 				>
-					<List className="size-[clamp(0.875rem,0.75rem+0.375vw,1rem)]" />
+					<List className={toolbarIconClass} />
 				</TooltipTrigger>
 				<TooltipContent>
 					<p>{t("content.editor.bullet_list")}</p>
@@ -271,14 +277,14 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 						/>
 					}
 				>
-					<ListOrdered className="size-[clamp(0.875rem,0.75rem+0.375vw,1rem)]" />
+					<ListOrdered className={toolbarIconClass} />
 				</TooltipTrigger>
 				<TooltipContent>
 					<p>{t("content.editor.ordered_list")}</p>
 				</TooltipContent>
 			</Tooltip>
 
-			<Separator orientation="vertical" className={separatorClass} />
+			<Separator orientation="vertical" className={toolbarSeparatorClass} />
 
 			{/* Blockquote */}
 			<Tooltip>
@@ -292,7 +298,7 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 						/>
 					}
 				>
-					<Quote className="size-[clamp(0.875rem,0.75rem+0.375vw,1rem)]" />
+					<Quote className={toolbarIconClass} />
 				</TooltipTrigger>
 				<TooltipContent>
 					<p>{t("content.editor.blockquote")}</p>
@@ -306,13 +312,13 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 						<Button
 							variant="ghost"
 							size="sm"
-							className="size-[clamp(1.5rem,1.25rem+0.75vw,1.75rem)] p-0"
+							className={toolbarSquareButtonClass}
 							aria-label={t("content.editor.remove_formatting")}
 							onClick={handleClearFormatting}
 						/>
 					}
 				>
-					<Eraser className="size-[clamp(0.875rem,0.75rem+0.375vw,1rem)]" />
+					<Eraser className={toolbarIconClass} />
 				</TooltipTrigger>
 				<TooltipContent>
 					<p>{t("content.editor.remove_formatting")}</p>
