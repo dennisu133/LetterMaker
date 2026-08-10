@@ -58,7 +58,10 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			"@": path.resolve(import.meta.dirname, "./src")
-		}
+		},
+		// ProseMirror breaks (e.g. Enter stops working) when two copies of these
+		// end up in the bundle; force a single resolution.
+		dedupe: ["prosemirror-model", "prosemirror-state", "prosemirror-transform", "prosemirror-view"]
 	},
 	build: {
 		// Optimize module preloading - exclude dynamically imported chunks

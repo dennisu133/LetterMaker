@@ -7,7 +7,9 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			"@": path.resolve(import.meta.dirname, "./src")
-		}
+		},
+		// Keep in sync with vite.config.ts: ProseMirror must resolve to one copy
+		dedupe: ["prosemirror-model", "prosemirror-state", "prosemirror-transform", "prosemirror-view"]
 	},
 	test: {
 		exclude: ["e2e/**", "node_modules/**", "dist/**"],

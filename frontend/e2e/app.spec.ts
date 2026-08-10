@@ -42,6 +42,19 @@ test("keeps selected calendar dates on the intended local day", async ({ page })
 	await expect(page.locator("#date")).toContainText(target.display);
 });
 
+test("creates a new paragraph when pressing Enter in the editor", async ({ page }) => {
+	// Regression: duplicate prosemirror-model copies in the bundle made
+	// splitBlock throw, silently swallowing every Enter press in production.
+	const editor = page.locator("#content");
+	await editor.click();
+	await page.keyboard.type("First paragraph");
+	await page.keyboard.press("Enter");
+	await page.keyboard.type("Second paragraph");
+
+	await expect(editor.locator("p")).toHaveCount(2);
+	await expect(editor.locator("p").nth(1)).toHaveText("Second paragraph");
+});
+
 test("updates all editor affordances when switching language", async ({ page }) => {
 	await page.getByRole("button", { name: "Switch language" }).click();
 	await page.getByRole("menuitem", { name: "🇩🇪 Deutsch" }).click();

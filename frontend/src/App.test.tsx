@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -53,6 +53,17 @@ describe("LetterMaker", () => {
 		expect(screen.getByRole("button", { name: "Absenden" })).toBeVisible();
 		expect(emptyParagraph).toHaveAttribute("data-placeholder", "Beginnen Sie mit Ihrem Brief…");
 		expect(document.documentElement).toHaveAttribute("lang", "de");
+	});
+
+	it("creates a new paragraph when pressing Enter in the editor", async () => {
+		// Regression test: duplicate prosemirror-model copies in the module
+		// graph make splitBlock throw, silently swallowing every Enter press.
+		render(<App />);
+
+		const editor = await screen.findByRole("textbox", { name: "Letter content" });
+		fireEvent.keyDown(editor, { key: "Enter" });
+
+		await waitFor(() => expect(editor.querySelectorAll("p")).toHaveLength(2));
 	});
 
 	it("fills and resets the complete example letter", async () => {
