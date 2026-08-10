@@ -59,8 +59,3 @@ export const useFormalities = () => {
 
 	return context;
 };
-
-// Helper to get flag emoji for a language using i18n translations
-export const getFormalitiesFlag = (language: FormalitiesLanguage): string => {
-	return i18n.t("language.flag", { lng: language }) as string;
-};

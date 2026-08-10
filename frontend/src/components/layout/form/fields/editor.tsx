@@ -4,7 +4,8 @@ import {
 	toolbarDropdownButtonClass,
 	toolbarIconClass,
 	toolbarSeparatorClass,
-	toolbarSquareButtonClass
+	toolbarSquareButtonClass,
+	toolbarToggleClass
 } from "@/components/layout/form/fields/editor-skeleton";
 import { Button } from "@/components/ui/button";
 import {
@@ -173,6 +174,7 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 				<TooltipTrigger
 					render={
 						<Toggle
+							className={toolbarToggleClass}
 							size="sm-responsive"
 							aria-label={t("content.editor.bold")}
 							pressed={editor.isActive("bold")}
@@ -192,6 +194,7 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 				<TooltipTrigger
 					render={
 						<Toggle
+							className={toolbarToggleClass}
 							size="sm-responsive"
 							aria-label={t("content.editor.italic")}
 							pressed={editor.isActive("italic")}
@@ -211,6 +214,7 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 				<TooltipTrigger
 					render={
 						<Toggle
+							className={toolbarToggleClass}
 							size="sm-responsive"
 							aria-label={t("content.editor.underline")}
 							pressed={editor.isActive("underline")}
@@ -230,6 +234,7 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 				<TooltipTrigger
 					render={
 						<Toggle
+							className={toolbarToggleClass}
 							size="sm-responsive"
 							aria-label={t("content.editor.strikethrough")}
 							pressed={editor.isActive("strike")}
@@ -251,6 +256,7 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 				<TooltipTrigger
 					render={
 						<Toggle
+							className={toolbarToggleClass}
 							size="sm-responsive"
 							aria-label={t("content.editor.bullet_list")}
 							pressed={editor.isActive("bulletList")}
@@ -270,6 +276,7 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 				<TooltipTrigger
 					render={
 						<Toggle
+							className={toolbarToggleClass}
 							size="sm-responsive"
 							aria-label={t("content.editor.ordered_list")}
 							pressed={editor.isActive("orderedList")}
@@ -291,6 +298,7 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 				<TooltipTrigger
 					render={
 						<Toggle
+							className={toolbarToggleClass}
 							size="sm-responsive"
 							aria-label={t("content.editor.blockquote")}
 							pressed={editor.isActive("blockquote")}
@@ -355,14 +363,14 @@ function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) 
 	const getEditorAttributes = React.useCallback(
 		() => ({
 			class: cn(
-				"dark:bg-input/30 min-h-16 prose prose-sm dark:prose-invert max-w-none flex-1 px-2.5 py-2 text-xs outline-none",
+				"min-h-28 max-w-none flex-1 py-2 font-serif text-[1.02rem] leading-[1.8] outline-none",
 				"[&_h1]:text-xl [&_h1]:font-bold [&_h1]:leading-snug",
 				"[&_h2]:text-sm [&_h2]:font-bold [&_h2]:leading-snug",
 				"[&_h3]:text-xs [&_h3]:font-semibold [&_h3]:leading-snug",
-				"[&_ul]:list-disc [&_ul]:pl-4",
-				"[&_ol]:list-decimal [&_ol]:pl-4",
-				"[&_blockquote]:border-l-2 [&_blockquote]:border-muted-foreground [&_blockquote]:pl-3 [&_blockquote]:italic",
-				"[&_.is-editor-empty:first-child]:before:text-muted-foreground [&_.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_.is-editor-empty:first-child]:before:float-left [&_.is-editor-empty:first-child]:before:h-0 [&_.is-editor-empty:first-child]:before:pointer-events-none"
+				"[&_ul]:list-disc [&_ul]:pl-5",
+				"[&_ol]:list-decimal [&_ol]:pl-5",
+				"[&_blockquote]:border-l-2 [&_blockquote]:border-paper-line [&_blockquote]:pl-3 [&_blockquote]:italic",
+				"[&_.is-editor-empty:first-child]:before:text-paper-faint [&_.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_.is-editor-empty:first-child]:before:float-left [&_.is-editor-empty:first-child]:before:h-0 [&_.is-editor-empty:first-child]:before:pointer-events-none"
 			),
 			id: "content",
 			role: "textbox",
@@ -447,10 +455,9 @@ function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) 
 	return (
 		<div
 			className={cn(
-				"border-input flex flex-1 flex-col border transition-colors",
-				"focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-1",
-				hasError &&
-					"border-destructive ring-destructive/20 focus-within:border-destructive focus-within:ring-destructive/50 dark:ring-destructive/40 ring-1"
+				"flex flex-1 flex-col border-b border-dashed transition-colors",
+				"border-paper-line focus-within:border-paper-foreground focus-within:border-solid",
+				hasError && "border-destructive border-solid"
 			)}
 		>
 			{editor && <EditorToolbar editor={editor} />}
@@ -469,8 +476,13 @@ export function ContentSection() {
 	const hasError = !!errors.content;
 
 	return (
-		<Field className="flex flex-1 flex-col gap-1" data-invalid={hasError}>
-			<FieldLabel htmlFor="content">{t("content.editor.label") + "\u2009*"}</FieldLabel>
+		<Field
+			className="group/editor mt-5 flex min-h-0 flex-1 flex-col gap-1 sm:mt-6"
+			data-invalid={hasError}
+		>
+			<FieldLabel htmlFor="content" className="sr-only">
+				{t("content.editor.label") + "\u2009*"}
+			</FieldLabel>
 			<Controller
 				name="content"
 				control={control}

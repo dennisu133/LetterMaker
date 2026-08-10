@@ -9,6 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { FormValues, ManualFormValues } from "@/lib/formSchema";
+import { inkInput } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 import { useFormContext, type FieldErrors } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -17,9 +18,10 @@ import { MAX_INPUT, MAX_TEXT_AREA } from "@/lib/constants";
 
 interface AddressSectionProps {
 	kind: "sender" | "recipient";
+	className?: string;
 }
 
-export function AddressSection({ kind }: AddressSectionProps) {
+export function AddressSection({ kind, className }: AddressSectionProps) {
 	const { t } = useTranslation();
 	const {
 		register,
@@ -34,20 +36,37 @@ export function AddressSection({ kind }: AddressSectionProps) {
 	const nameErrorId = `${nameField}-error`;
 	const addressErrorId = `${addressField}-error`;
 
+	const isRecipient = kind === "recipient";
+
 	return (
-		<FieldSet className="mb-0 flex-1">
-			<FieldLegend>{t(`contact.${kind}`)}</FieldLegend>
-			<FieldGroup>
+		<FieldSet
+			className={cn(
+				"m-0 gap-1 border-0 bg-transparent p-0",
+				// The recipient block mimics the envelope's address window
+				isRecipient &&
+					"bg-paper-foreground/2 border-paper-line max-w-sm gap-1 rounded-[2px] border border-solid p-3 sm:p-4",
+				className
+			)}
+		>
+			<FieldLegend className={cn("paper-label float-left mb-2 w-full p-0")}>
+				{t(`contact.${kind}`)}
+			</FieldLegend>
+			<FieldGroup className={cn("gap-2", isRecipient && "gap-3")}>
 				<Field data-invalid={!!nameError}>
-					<FieldLabel htmlFor={nameField}>
+					<FieldLabel htmlFor={nameField} className="sr-only">
 						{t("contact.name.label")}
-						{kind === "recipient" && "\u2009*"}
+						{isRecipient && " *"}
 					</FieldLabel>
 					<Input
 						id={nameField}
 						maxLength={MAX_INPUT}
 						placeholder={t("contact.name.placeholder")}
-						className={cn(nameError && "border-destructive focus-visible:ring-destructive")}
+						className={cn(
+							inkInput,
+							isRecipient
+								? "text-[1.05rem] font-medium md:text-[1.05rem]"
+								: "text-[0.95rem] md:text-[0.95rem]"
+						)}
 						aria-invalid={!!nameError}
 						aria-describedby={nameError ? nameErrorId : undefined}
 						{...register(nameField)}
@@ -56,17 +75,20 @@ export function AddressSection({ kind }: AddressSectionProps) {
 				</Field>
 
 				<Field data-invalid={!!addressError}>
-					<FieldLabel htmlFor={addressField}>
+					<FieldLabel htmlFor={addressField} className="sr-only">
 						{t("contact.address.label")}
-						{kind === "recipient" && "\u2009*"}
+						{isRecipient && " *"}
 					</FieldLabel>
 					<Textarea
 						id={addressField}
 						maxLength={MAX_TEXT_AREA}
 						placeholder={t("contact.address.placeholder")}
 						className={cn(
-							"resize-none",
-							addressError && "border-destructive focus-visible:ring-destructive"
+							inkInput,
+							"resize-none leading-relaxed",
+							isRecipient
+								? "text-[1.05rem] md:text-[1.05rem]"
+								: "min-h-0 text-[0.95rem] md:text-[0.95rem]"
 						)}
 						aria-invalid={!!addressError}
 						aria-describedby={addressError ? addressErrorId : undefined}

@@ -14,6 +14,30 @@
 		U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+@font-face {
+	font-family: "Source Serif 4 Variable";
+	font-style: normal;
+	font-display: swap;
+	font-weight: 200 900;
+	src: url("@fontsource-variable/source-serif-4/files/source-serif-4-latin-wght-normal.woff2")
+		format("woff2-variations");
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+		U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+	font-family: "Caveat Variable";
+	font-style: normal;
+	font-display: swap;
+	font-weight: 400 700;
+	src: url("@fontsource-variable/caveat/files/caveat-latin-wght-normal.woff2")
+		format("woff2-variations");
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+		U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme {
@@ -23,89 +47,79 @@
 }
 
 :root {
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.13 0.028 261.692);
-	--popover: oklch(0.985 0.002 247.839);
-	--popover-foreground: oklch(0.13 0.028 261.692);
-	--primary: oklch(0.488 0.243 264.376);
-	--primary-foreground: oklch(0.97 0.014 254.604);
-	--secondary: oklch(0.967 0.001 286.375);
-	--secondary-foreground: oklch(0.21 0.006 285.885);
-	--muted: oklch(0.967 0.003 264.542);
-	--muted-foreground: oklch(0.551 0.027 264.364);
-	--accent: oklch(0.967 0.003 264.542);
-	--accent-foreground: oklch(0.21 0.034 264.665);
-	--destructive: oklch(0.577 0.245 27.325);
-	--border: oklch(0.6 0.004 286.32);
-	--input: oklch(0.6 0.004 286.32 / 0.5);
-	--ring: oklch(0.707 0.022 261.325);
-	--chart-1: oklch(0.809 0.105 251.813);
-	--chart-2: oklch(0.623 0.214 259.815);
-	--chart-3: oklch(0.546 0.245 262.881);
-	--chart-4: oklch(0.488 0.243 264.376);
-	--chart-5: oklch(0.424 0.199 265.638);
-	--radius: 0.625rem;
-	--sidebar: oklch(0.985 0.002 247.839);
-	--sidebar-foreground: oklch(0.13 0.028 261.692);
-	--sidebar-primary: oklch(0.546 0.245 262.881);
-	--sidebar-primary-foreground: oklch(0.97 0.014 254.604);
-	--sidebar-accent: oklch(0.967 0.003 264.542);
-	--sidebar-accent-foreground: oklch(0.21 0.034 264.665);
-	--sidebar-border: oklch(0.928 0.006 264.531);
-	--sidebar-ring: oklch(0.707 0.022 261.325);
-	--background: oklch(0.985 0.002 247.839);
-	--foreground: oklch(0.13 0.028 261.692);
+	/* Desk chrome (navbar, footer, dialogs) */
+	--background: oklch(0.88 0.014 80);
+	--foreground: oklch(0.27 0.02 60);
+	--card: oklch(0.975 0.008 85);
+	--card-foreground: oklch(0.25 0.018 270);
+	--popover: oklch(0.965 0.008 85);
+	--popover-foreground: oklch(0.27 0.02 60);
+	--primary: oklch(0.38 0.1 265);
+	--primary-foreground: oklch(0.97 0.01 85);
+	--secondary: oklch(0.92 0.012 82);
+	--secondary-foreground: oklch(0.3 0.02 60);
+	--muted: oklch(0.92 0.012 82);
+	--muted-foreground: oklch(0.4 0.02 70);
+	--accent: oklch(0.9 0.014 82);
+	--accent-foreground: oklch(0.27 0.02 60);
+	--destructive: oklch(0.5 0.19 27);
+	--border: oklch(0.78 0.016 78);
+	--input: oklch(0.78 0.016 78 / 0.5);
+	--ring: oklch(0.5 0.06 80);
+	--radius: 0.25rem;
+
+	/* Tooltips are ink-dark in both themes so they contrast with the paper
+	   (which stays light in dark mode) as well as with the desk */
+	--tooltip: oklch(0.26 0.02 270);
+	--tooltip-foreground: oklch(0.97 0.008 90);
+
+	/* The letter itself: warm paper and blue-black ink, in both themes */
+	--paper: oklch(0.985 0.006 90);
+	--paper-foreground: oklch(0.25 0.018 270);
+	--paper-muted: oklch(0.47 0.018 75);
+	--paper-faint: oklch(0.58 0.016 75);
+	--paper-line: oklch(0.86 0.012 85);
+	--sheet-shadow:
+		0 1px 2px oklch(0.2 0.02 60 / 0.1), 0 6px 16px oklch(0.2 0.02 60 / 0.1),
+		0 24px 48px oklch(0.2 0.02 60 / 0.14);
+	--desk-glow: transparent;
 }
 
 .dark {
-	--background: oklch(0.13 0.028 261.692);
-	--foreground: oklch(0.985 0.002 247.839);
-	--card: oklch(0.21 0.034 264.665);
-	--card-foreground: oklch(0.985 0.002 247.839);
-	--popover: oklch(0.21 0.034 264.665);
-	--popover-foreground: oklch(0.985 0.002 247.839);
-	--primary: oklch(0.42 0.18 266);
-	--primary-foreground: oklch(0.97 0.014 254.604);
-	--secondary: oklch(0.274 0.006 286.033);
-	--secondary-foreground: oklch(0.985 0 0);
-	--muted: oklch(0.278 0.033 256.848);
-	--muted-foreground: oklch(0.707 0.022 261.325);
-	--accent: oklch(0.278 0.033 256.848);
-	--accent-foreground: oklch(0.985 0.002 247.839);
-	--destructive: oklch(0.704 0.191 22.216);
-	--border: oklch(1 0 0 / 10%);
+	/* Night desk: dark warm wood, a pool of lamplight, dimmed cream paper */
+	--background: oklch(0.185 0.012 60);
+	--foreground: oklch(0.85 0.018 82);
+	--card: oklch(0.24 0.014 60);
+	--card-foreground: oklch(0.85 0.018 82);
+	--popover: oklch(0.24 0.014 60);
+	--popover-foreground: oklch(0.85 0.018 82);
+	--primary: oklch(0.42 0.11 265);
+	--primary-foreground: oklch(0.96 0.01 85);
+	--secondary: oklch(0.27 0.016 60);
+	--secondary-foreground: oklch(0.85 0.018 82);
+	--muted: oklch(0.27 0.016 60);
+	--muted-foreground: oklch(0.68 0.018 75);
+	--accent: oklch(0.29 0.018 62);
+	--accent-foreground: oklch(0.88 0.018 82);
+	--destructive: oklch(0.7 0.19 22);
+	--border: oklch(1 0 0 / 12%);
 	--input: oklch(1 0 0 / 15%);
-	--ring: oklch(0.551 0.027 264.364);
-	--chart-1: oklch(0.809 0.105 251.813);
-	--chart-2: oklch(0.623 0.214 259.815);
-	--chart-3: oklch(0.546 0.245 262.881);
-	--chart-4: oklch(0.488 0.243 264.376);
-	--chart-5: oklch(0.424 0.199 265.638);
-	--sidebar: oklch(0.21 0.034 264.665);
-	--sidebar-foreground: oklch(0.985 0.002 247.839);
-	--sidebar-primary: oklch(0.623 0.214 259.815);
-	--sidebar-primary-foreground: oklch(0.97 0.014 254.604);
-	--sidebar-accent: oklch(0.278 0.033 256.848);
-	--sidebar-accent-foreground: oklch(0.985 0.002 247.839);
-	--sidebar-border: oklch(1 0 0 / 10%);
-	--sidebar-ring: oklch(0.551 0.027 264.364);
+	--ring: oklch(0.6 0.05 80);
+
+	--paper: oklch(0.85 0.022 88);
+	--paper-foreground: oklch(0.23 0.018 270);
+	--paper-muted: oklch(0.37 0.018 75);
+	--paper-faint: oklch(0.52 0.016 75);
+	--paper-line: oklch(0.73 0.018 85);
+	--sheet-shadow:
+		0 1px 2px oklch(0 0 0 / 0.35), 0 8px 24px oklch(0 0 0 / 0.35), 0 32px 64px oklch(0 0 0 / 0.45);
+	--desk-glow: oklch(0.26 0.022 75 / 0.9);
 }
 
 @theme inline {
 	--font-sans: "Inter Variable", sans-serif;
-	--color-sidebar-ring: var(--sidebar-ring);
-	--color-sidebar-border: var(--sidebar-border);
-	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-	--color-sidebar-accent: var(--sidebar-accent);
-	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-	--color-sidebar-primary: var(--sidebar-primary);
-	--color-sidebar-foreground: var(--sidebar-foreground);
-	--color-sidebar: var(--sidebar);
-	--color-chart-5: var(--chart-5);
-	--color-chart-4: var(--chart-4);
-	--color-chart-3: var(--chart-3);
-	--color-chart-2: var(--chart-2);
-	--color-chart-1: var(--chart-1);
+	--font-serif: "Source Serif 4 Variable", Georgia, serif;
+	--font-signature: "Caveat Variable", "Segoe Script", cursive;
 	--color-ring: var(--ring);
 	--color-input: var(--input);
 	--color-border: var(--border);
@@ -124,6 +138,13 @@
 	--color-card: var(--card);
 	--color-foreground: var(--foreground);
 	--color-background: var(--background);
+	--color-tooltip: var(--tooltip);
+	--color-tooltip-foreground: var(--tooltip-foreground);
+	--color-paper: var(--paper);
+	--color-paper-foreground: var(--paper-foreground);
+	--color-paper-muted: var(--paper-muted);
+	--color-paper-faint: var(--paper-faint);
+	--color-paper-line: var(--paper-line);
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
@@ -145,5 +166,48 @@
 	}
 	#root {
 		@apply flex min-h-screen flex-col;
+	}
+}
+
+@layer components {
+	/* The desk surface behind the letter */
+	.desk {
+		background:
+			radial-gradient(ellipse 120% 60% at 50% -10%, var(--desk-glow), transparent 70%),
+			var(--background);
+	}
+
+	/* The sheet of paper the letter is written on */
+	.letter-sheet {
+		position: relative;
+		background-color: var(--paper);
+		color: var(--paper-foreground);
+		box-shadow: var(--sheet-shadow);
+		border-radius: 1px;
+		/* Everything on the paper is ink on a light surface in both themes, so
+		   theme-dependent tokens are re-scoped to paper-safe values here. */
+		--destructive: oklch(0.5 0.19 27);
+		--ring: oklch(0.45 0.05 270);
+	}
+	/* Subtle paper grain */
+	.letter-sheet::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		border-radius: inherit;
+		opacity: 0.5;
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.42 0 0 0 0 0.36 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+	}
+
+	/* Tiny letterpress annotations used as field labels on the sheet */
+	.paper-label {
+		font-family: var(--font-sans);
+		font-size: 0.72rem;
+		line-height: 1.2;
+		font-weight: 500;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--paper-muted);
 	}
 }

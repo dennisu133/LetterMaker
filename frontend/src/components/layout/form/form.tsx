@@ -1,4 +1,3 @@
-import { CheckCircle } from "lucide-react";
 import * as React from "react";
 import { FormProvider, useForm, type Resolver } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -8,8 +7,8 @@ import { AddressSection } from "@/components/layout/form/fields/address";
 import { ClosingSection } from "@/components/layout/form/fields/closing";
 import { DetailsSection } from "@/components/layout/form/fields/content";
 import { ContentSectionSkeleton } from "@/components/layout/form/fields/editor-skeleton";
+import { StampCorner } from "@/components/layout/form/stamp-corner";
 import { SubmissionProvider, useSubmission } from "@/components/submission-provider";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { openPdfInNewTab, submitLetter } from "@/lib/api";
 import { todayLocalDate } from "@/lib/date";
 import { createEmptyFormValues } from "@/lib/formDefaults";
@@ -47,22 +46,6 @@ const ContentSection = React.lazy(async () => {
 	const module = await import("@/components/layout/form/fields/editor");
 	return { default: module.ContentSection };
 });
-
-function StampSuccessCard() {
-	const { t } = useTranslation();
-
-	return (
-		<Card className="m-4 mb-0 border border-green-500/50 bg-green-50/50 dark:border-green-600/50 dark:bg-green-950/20">
-			<CardHeader>
-				<CardTitle className="flex items-center gap-2 text-green-600 dark:text-green-500">
-					<CheckCircle className="size-5" />
-					{t("stamp.success.title")}
-				</CardTitle>
-				<CardDescription>{t("stamp.success.description")}</CardDescription>
-			</CardHeader>
-		</Card>
-	);
-}
 
 function LetterFormContent() {
 	const { t } = useTranslation();
@@ -176,19 +159,27 @@ function LetterFormContent() {
 
 	return (
 		<FormProvider {...form}>
-			<form onSubmit={handleFormSubmit} noValidate className="flex flex-1 flex-col">
-				{stamp.isValid ? (
-					<StampSuccessCard />
-				) : (
-					<div className="flex flex-col sm:flex-row">
-						<AddressSection kind="sender" />
-						<AddressSection kind="recipient" />
+			<form
+				onSubmit={handleFormSubmit}
+				noValidate
+				className="flex w-full flex-1 flex-col items-center px-2 py-4 sm:px-6 sm:py-6"
+			>
+				<div className="letter-sheet flex w-full max-w-6xl flex-1 flex-col px-5 py-6 sm:px-10 sm:py-8">
+					{/* Letterhead: sender and recipient window left, stamp corner right */}
+					<div className="flex flex-col-reverse gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
+						{stamp.isValid ? (
+							<div className="hidden flex-1 sm:block" aria-hidden="true" />
+						) : (
+							<div className="flex flex-1 flex-col gap-4 md:flex-row md:gap-10">
+								<AddressSection kind="sender" className="flex-1 md:max-w-xs" />
+								<AddressSection kind="recipient" className="flex-1 md:max-w-sm" />
+							</div>
+						)}
+						<StampCorner />
 					</div>
-				)}
 
-				<DetailsSection />
+					<DetailsSection />
 
-				<div className="bg-card mx-4 mb-4 flex flex-1 flex-col gap-4 border border-t-0 p-4">
 					<React.Suspense fallback={<ContentSectionSkeleton />}>
 						<ContentSection />
 					</React.Suspense>

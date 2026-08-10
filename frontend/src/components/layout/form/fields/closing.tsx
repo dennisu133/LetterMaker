@@ -1,13 +1,10 @@
-import { AlertCircle } from "lucide-react";
 import * as React from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { Formalities } from "@/components/common/formalities";
-import { useStamp } from "@/components/form-actions-provider";
 import { useFormalities } from "@/components/formalities-provider";
-import { useSubmission } from "@/components/submission-provider";
-import { Button } from "@/components/ui/button";
+import { FormActions } from "@/components/layout/form/fields/actions";
 import {
 	ComboboxContent,
 	ComboboxFreeForm,
@@ -15,19 +12,11 @@ import {
 	ComboboxItem,
 	ComboboxList
 } from "@/components/ui/combobox";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-	Popover,
-	PopoverContent,
-	PopoverDescription,
-	PopoverHeader,
-	PopoverTitle,
-	PopoverTrigger
-} from "@/components/ui/popover";
-import { Spinner } from "@/components/ui/spinner";
 import { MAX_INPUT, MAX_TEXT_AREA } from "@/lib/constants";
 import type { FormValues } from "@/lib/formSchema";
+import { inkInput } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
 export function ClosingSection() {
@@ -35,11 +24,8 @@ export function ClosingSection() {
 		control,
 		watch,
 		setValue,
-		reset,
 		formState: { errors }
 	} = useFormContext<FormValues>();
-	const { clearStamp } = useStamp();
-	const { state: submissionState, clearError, canSubmit, cooldownSeconds } = useSubmission();
 	// Track whether signature is linked to senderName
 	const isSignatureLinkedRef = React.useRef(true);
 
@@ -54,9 +40,15 @@ export function ClosingSection() {
 		}) as string[];
 	}, [i18n, formalitiesLanguage]);
 
-	// Subscribe to senderName changes and sync to signature when linked
+	// Subscribe to senderName changes and sync to signature when linked.
+	// A form reset fires the subscription without a field name; it re-links
+	// the signature so the next example fill syncs again.
 	React.useEffect(() => {
 		const subscription = watch((value, { name }) => {
+			if (!name) {
+				isSignatureLinkedRef.current = true;
+				return;
+			}
 			if (name === "senderName" && isSignatureLinkedRef.current && "senderName" in value) {
 				setValue("signature", value.senderName ?? "", { shouldDirty: false });
 			}
@@ -64,19 +56,13 @@ export function ClosingSection() {
 		return () => subscription.unsubscribe();
 	}, [watch, setValue]);
 
-	const hasError = submissionState.error !== null;
-
-	const handlePopoverOpenChange = (open: boolean) => {
-		if (!open && hasError) {
-			clearError();
-		}
-	};
-
 	return (
-		<FieldGroup className="grid grid-cols-1 items-end gap-4 sm:grid-cols-[3fr_2fr_auto]">
+		<div className="mt-auto grid grid-cols-1 items-end gap-4 pt-5 sm:grid-cols-[3fr_2fr_auto] sm:gap-8 sm:pt-6">
 			<Field data-invalid={!!errors.closing}>
-				<FieldLabel htmlFor="closing">{t("content.closing.label")}</FieldLabel>
-				<div className="flex gap-2">
+				<FieldLabel htmlFor="closing" className="sr-only">
+					{t("content.closing.label")}
+				</FieldLabel>
+				<div className="flex items-end gap-2">
 					<Formalities tooltip="content.closing.tooltip" />
 					<Controller
 						name="closing"
@@ -86,10 +72,7 @@ export function ClosingSection() {
 								<ComboboxFreeFormInput
 									id="closing"
 									maxLength={MAX_INPUT}
-									className={cn(
-										"flex-1",
-										fieldState.error && "border-destructive focus-visible:ring-destructive"
-									)}
+									className={cn(inkInput, "flex-1 text-[1.05rem] md:text-[1.05rem]")}
 									placeholder={t("content.closing.placeholder")}
 									onBlur={field.onBlur}
 									triggerAriaLabel={t("content.closing.label")}
@@ -111,8 +94,12 @@ export function ClosingSection() {
 				</div>
 				<FieldError id="closing-error">{errors.closing && t("form.validation.closing")}</FieldError>
 			</Field>
+
+			{/* The signature is rendered in a handwriting face, like a signed letter */}
 			<Field data-invalid={!!errors.signature}>
-				<FieldLabel htmlFor="signature">{t("content.signature.label") + "\u2009*"}</FieldLabel>
+				<FieldLabel htmlFor="signature" className="sr-only">
+					{t("content.signature.label") + "\u2009*"}
+				</FieldLabel>
 				<Controller
 					name="signature"
 					control={control}
@@ -131,7 +118,8 @@ export function ClosingSection() {
 							aria-invalid={!!fieldState.error}
 							aria-describedby={fieldState.error ? "signature-error" : undefined}
 							className={cn(
-								fieldState.error && "border-destructive focus-visible:ring-destructive"
+								inkInput,
+								"font-signature text-[1.6rem] leading-tight font-medium md:text-[1.6rem]"
 							)}
 						/>
 					)}
@@ -140,49 +128,8 @@ export function ClosingSection() {
 					{errors.signature && t("form.validation.signature")}
 				</FieldError>
 			</Field>
-			<div className="flex flex-row justify-end gap-2 sm:w-auto">
-				<Popover open={hasError} onOpenChange={handlePopoverOpenChange}>
-					<PopoverTrigger
-						render={
-							<Button
-								className="min-w-24"
-								type="submit"
-								disabled={submissionState.isSubmitting || !canSubmit}
-							>
-								{submissionState.isSubmitting && <Spinner className="mr-2" />}
-								{!canSubmit && !submissionState.isSubmitting
-									? t("button.submitCooldown", { seconds: cooldownSeconds })
-									: t("button.submit")}
-							</Button>
-						}
-					/>
-					{submissionState.error && (
-						<PopoverContent align="start" side="top" className="w-80">
-							<PopoverHeader>
-								<PopoverTitle className="text-destructive flex items-center gap-2">
-									<AlertCircle className="size-4" />
-									{t("form.error.title")}
-								</PopoverTitle>
-								<PopoverDescription>{t(`form.error.${submissionState.error}`)}</PopoverDescription>
-							</PopoverHeader>
-						</PopoverContent>
-					)}
-				</Popover>
-				<Button
-					variant="outline"
-					type="button"
-					disabled={submissionState.isSubmitting}
-					onClick={() => {
-						reset();
-						clearStamp();
-						clearError();
-						// Re-enable signature linking after reset
-						isSignatureLinkedRef.current = true;
-					}}
-				>
-					{t("button.reset")}
-				</Button>
-			</div>
-		</FieldGroup>
+
+			<FormActions />
+		</div>
 	);
 }

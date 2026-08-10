@@ -1,4 +1,4 @@
-import { getFormalitiesFlag, useFormalities } from "@/components/formalities-provider";
+import { useFormalities } from "@/components/formalities-provider";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { supportedLanguages } from "@/i18n";
+import { quietControl } from "@/lib/paper";
+import { cn } from "@/lib/utils";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -34,11 +36,19 @@ export function Formalities({ tooltip = "content.salutation.language" }: Formali
 				<TooltipTrigger
 					render={
 						<DropdownMenuTrigger
-							render={<Button variant="outline" className="border-input bg-card" size="icon" />}
+							render={
+								<Button
+									variant="ghost"
+									className={cn(quietControl, "dark:hover:bg-paper-foreground/10 size-8")}
+									size="icon"
+								/>
+							}
 						/>
 					}
 				>
-					<span className="text-lg">{getFormalitiesFlag(language)}</span>
+					<span className="font-sans text-[0.72rem] font-semibold tracking-widest uppercase">
+						{language}
+					</span>
 					<span className="sr-only">{t(tooltip)}</span>
 				</TooltipTrigger>
 				<TooltipContent>

@@ -13,14 +13,7 @@ import {
 	ComboboxItem,
 	ComboboxList
 } from "@/components/ui/combobox";
-import {
-	Field,
-	FieldError,
-	FieldGroup,
-	FieldLabel,
-	FieldLegend,
-	FieldSet
-} from "@/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
@@ -28,6 +21,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { MAX_INPUT, MAX_TEXT_AREA } from "@/lib/constants";
 import { formatLocalDate, parseLocalDate } from "@/lib/date";
 import type { FormValues } from "@/lib/formSchema";
+import { inkInput, quietControl } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
 const MAX_SUBJECT_LINES = 5;
@@ -75,90 +69,97 @@ export function DetailsSection() {
 	};
 
 	return (
-		<FieldSet className="mb-0 border-b-0">
-			<FieldLegend>{t("content.title")}</FieldLegend>
-			<FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-[2fr_5fr]">
-				<Field data-invalid={!!errors.date}>
-					<FieldLabel htmlFor="date">{t("content.date.label") + "\u2009*"}</FieldLabel>
-					<Controller
-						name="date"
-						control={control}
-						render={({ field, fieldState }) => {
-							const dateValue = parseLocalDate(field.value);
-							return (
-								<Popover open={dateOpen} onOpenChange={setDateOpen}>
-									<PopoverTrigger
-										id="date"
-										render={(props) => (
-											<Button
-												{...props}
-												variant="outline"
-												className={cn(
-													"border-input hover:bg-input/30 w-full justify-between bg-transparent font-normal",
-													fieldState.error && "border-destructive focus-visible:ring-destructive"
-												)}
-												aria-invalid={!!fieldState.error}
-												aria-describedby={fieldState.error ? "date-error" : undefined}
-											>
-												{dateValue
-													? dateFormatter.format(dateValue)
-													: t("content.date.placeholder")}
-												<CalendarIcon />
-											</Button>
-										)}
-									/>
-									<PopoverContent className="w-auto overflow-hidden p-0" align="start">
-										<React.Suspense fallback={<div className="size-72" aria-hidden="true" />}>
-											<Calendar
-												mode="single"
-												className="bg-input"
-												selected={dateValue}
-												captionLayout="dropdown"
-												onSelect={(date) => {
-													field.onChange(date ? formatLocalDate(date) : "");
-													setDateOpen(false);
-												}}
-											/>
-										</React.Suspense>
-									</PopoverContent>
-								</Popover>
-							);
-						}}
-					/>
-					<FieldError id="date-error">{errors.date && t("form.validation.date")}</FieldError>
-				</Field>
+		<div className="mt-5 flex flex-col gap-4 sm:mt-7 sm:gap-5">
+			{/* The date sits right-aligned like on a printed letter */}
+			<Field data-invalid={!!errors.date} className="items-end [&>*]:w-auto">
+				<FieldLabel htmlFor="date" className="sr-only">
+					{t("content.date.label") + "\u2009*"}
+				</FieldLabel>
+				<Controller
+					name="date"
+					control={control}
+					render={({ field, fieldState }) => {
+						const dateValue = parseLocalDate(field.value);
+						return (
+							<Popover open={dateOpen} onOpenChange={setDateOpen}>
+								<PopoverTrigger
+									id="date"
+									render={(props) => (
+										<Button
+											{...props}
+											variant="ghost"
+											className={cn(
+												"group border-paper-line hover:border-paper-muted h-auto gap-2 rounded-none border-0 border-b border-dashed bg-transparent px-0 py-0.5 font-serif text-[1rem] font-normal",
+												quietControl,
+												"text-paper-foreground hover:bg-transparent dark:hover:bg-transparent",
+												!dateValue && "text-paper-faint",
+												fieldState.error && "border-destructive border-solid"
+											)}
+											aria-invalid={!!fieldState.error}
+											aria-describedby={fieldState.error ? "date-error" : undefined}
+										>
+											{dateValue ? dateFormatter.format(dateValue) : t("content.date.placeholder")}
+											<CalendarIcon className="text-paper-muted size-4 opacity-60 transition-opacity group-hover:opacity-100" />
+										</Button>
+									)}
+								/>
+								<PopoverContent className="w-auto overflow-hidden p-0" align="end">
+									<React.Suspense fallback={<div className="size-72" aria-hidden="true" />}>
+										<Calendar
+											mode="single"
+											className="bg-popover"
+											selected={dateValue}
+											captionLayout="dropdown"
+											onSelect={(date) => {
+												field.onChange(date ? formatLocalDate(date) : "");
+												setDateOpen(false);
+											}}
+										/>
+									</React.Suspense>
+								</PopoverContent>
+							</Popover>
+						);
+					}}
+				/>
+				<FieldError id="date-error" className="text-right">
+					{errors.date && t("form.validation.date")}
+				</FieldError>
+			</Field>
 
-				<Field data-invalid={!!errors.subject}>
-					<FieldLabel htmlFor="subject">{t("content.subject.label") + "\u2009*"}</FieldLabel>
-					<Controller
-						name="subject"
-						control={control}
-						render={({ field, fieldState }) => (
-							<Textarea
-								id="subject"
-								placeholder={t("content.subject.placeholder")}
-								maxLength={MAX_TEXT_AREA}
-								value={field.value}
-								onChange={(e) => field.onChange(limitSubjectLines(e.target.value))}
-								onBlur={field.onBlur}
-								aria-invalid={!!fieldState.error}
-								aria-describedby={fieldState.error ? "subject-error" : undefined}
-								className={cn(
-									"min-h-8 resize-none pt-1 pb-0.5",
-									fieldState.error && "border-destructive focus-visible:ring-destructive"
-								)}
-							/>
-						)}
-					/>
-					<FieldError id="subject-error">
-						{errors.subject && t("form.validation.subject")}
-					</FieldError>
-				</Field>
-			</FieldGroup>
+			{/* Subject: the bold line of the letter */}
+			<Field data-invalid={!!errors.subject}>
+				<FieldLabel htmlFor="subject" className="sr-only">
+					{t("content.subject.label") + "\u2009*"}
+				</FieldLabel>
+				<Controller
+					name="subject"
+					control={control}
+					render={({ field, fieldState }) => (
+						<Textarea
+							id="subject"
+							placeholder={t("content.subject.placeholder")}
+							maxLength={MAX_TEXT_AREA}
+							value={field.value}
+							onChange={(e) => field.onChange(limitSubjectLines(e.target.value))}
+							onBlur={field.onBlur}
+							aria-invalid={!!fieldState.error}
+							aria-describedby={fieldState.error ? "subject-error" : undefined}
+							className={cn(
+								inkInput,
+								"resize-none text-[1.14rem] leading-snug font-semibold md:text-[1.14rem]"
+							)}
+						/>
+					)}
+				/>
+				<FieldError id="subject-error">{errors.subject && t("form.validation.subject")}</FieldError>
+			</Field>
 
+			{/* Salutation with its quiet language + comma helpers */}
 			<Field data-invalid={!!errors.salutation}>
-				<FieldLabel htmlFor="salutation">{t("content.salutation.label")}</FieldLabel>
-				<div className="flex gap-2">
+				<FieldLabel htmlFor="salutation" className="sr-only">
+					{t("content.salutation.label")}
+				</FieldLabel>
+				<div className="flex items-end gap-2">
 					<Formalities tooltip="content.salutation.tooltip" />
 					<Controller
 						name="salutation"
@@ -173,10 +174,7 @@ export function DetailsSection() {
 									id="salutation"
 									maxLength={MAX_INPUT}
 									placeholder={t("content.salutation.placeholder")}
-									className={cn(
-										"flex-1",
-										fieldState.error && "border-destructive focus-visible:ring-destructive"
-									)}
+									className={cn(inkInput, "flex-1 text-[1.05rem] md:text-[1.05rem]")}
 									onBlur={field.onBlur}
 									triggerAriaLabel={t("content.salutation.label")}
 									aria-invalid={!!fieldState.error}
@@ -203,7 +201,8 @@ export function DetailsSection() {
 								<TooltipTrigger
 									render={
 										<Toggle
-											variant="outline"
+											size="sm"
+											className={cn(quietControl, "font-serif text-[1.05rem] md:text-[1.05rem]")}
 											pressed={field.value}
 											onPressedChange={field.onChange}
 										/>
@@ -222,6 +221,6 @@ export function DetailsSection() {
 					{errors.salutation && t("form.validation.salutation")}
 				</FieldError>
 			</Field>
-		</FieldSet>
+		</div>
 	);
 }
