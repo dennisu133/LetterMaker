@@ -1,0 +1,21 @@
+<!-- Procedural paper-tooth tile for the letter sheet (index.css:
+     .letter-sheet::before). Two speckle layers, both seamless when tiled: a
+     warm dark tooth and a lighter counter-speckle, each mapped from stitched
+     fractal noise straight to a low alpha so the texture reads as surface
+     grain, never as aging or staining. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480">
+	<defs>
+		<filter id="dark-tooth" x="0" y="0" width="100%" height="100%">
+			<feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" seed="11" stitchTiles="stitch"/>
+			<!-- Constant warm-umber RGB; alpha from the noise, offset so only
+			     the darkest ~15% of pixels keep a faint presence. -->
+			<feColorMatrix type="matrix" values="0 0 0 0 0.30  0 0 0 0 0.25  0 0 0 0 0.20  0.20 0.20 0.20 0 -0.26"/>
+		</filter>
+		<filter id="light-tooth" x="0" y="0" width="100%" height="100%">
+			<feTurbulence type="fractalNoise" baseFrequency="0.42" numOctaves="2" seed="29" stitchTiles="stitch"/>
+			<feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 0.98  0 0 0 0 0.92  0.18 0.18 0.18 0 -0.24"/>
+		</filter>
+	</defs>
+	<rect width="480" height="480" filter="url(#dark-tooth)"/>
+	<rect width="480" height="480" filter="url(#light-tooth)"/>
+</svg>
