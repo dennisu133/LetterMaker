@@ -1,6 +1,6 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import path from "path";
+import path from "node:path";
 import { defineConfig, type Plugin } from "vite";
 import { compression } from "vite-plugin-compression2";
 
@@ -57,7 +57,7 @@ export default defineConfig({
 	],
 	resolve: {
 		alias: {
-			"@": path.resolve(__dirname, "./src")
+			"@": path.resolve(import.meta.dirname, "./src")
 		}
 	},
 	build: {
