@@ -8,10 +8,7 @@
 		"dateLocale": "en-US"
 	},
 	"theme": {
-		"tooltip": "Toggle theme",
-		"light": "Light",
-		"dark": "Dark",
-		"system": "System"
+		"tooltip": "Toggle theme"
 	},
 	"button": {
 		"stamp": "Upload Stamp",

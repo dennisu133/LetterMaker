@@ -1,64 +1,77 @@
-import { createContext, useCallback, useContext, useLayoutEffect, useMemo, useState } from "react";
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useLayoutEffect,
+	useMemo,
+	useState
+} from "react";
 
-type Theme = "dark" | "light" | "system";
+type Theme = "dark" | "light";
 
 type ThemeProviderProps = {
 	children: React.ReactNode;
-	defaultTheme?: Theme;
 	storageKey?: string;
 };
 
 type ThemeProviderState = {
+	/** The theme currently applied (the user override, or the system theme). */
 	theme: Theme;
-	setTheme: (theme: Theme) => void;
+	/** Flips the theme. Toggling back to the system's current theme clears the
+	 * override, so the page resumes following the OS preference. */
+	toggleTheme: () => void;
 };
 
-const themes: Theme[] = ["dark", "light", "system"];
+const themes: Theme[] = ["dark", "light"];
 
 const ThemeProviderContext = createContext<ThemeProviderState | null>(null);
 
-export function ThemeProvider({
-	children,
-	defaultTheme = "system",
-	storageKey = "theme"
-}: ThemeProviderProps) {
-	const [theme, setThemeState] = useState<Theme>(() => {
+const getSystemTheme = (): Theme =>
+	window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+
+export function ThemeProvider({ children, storageKey = "theme" }: ThemeProviderProps) {
+	// The stored value is only ever a manual override; absence means "follow
+	// the system". Legacy values like "system" fail validation and are ignored.
+	const [override, setOverride] = useState<Theme | null>(() => {
 		const storedTheme = localStorage.getItem(storageKey);
-		return themes.includes(storedTheme as Theme) ? (storedTheme as Theme) : defaultTheme;
+		return themes.includes(storedTheme as Theme) ? (storedTheme as Theme) : null;
 	});
+	const [systemTheme, setSystemTheme] = useState<Theme>(getSystemTheme);
+
+	const theme = override ?? systemTheme;
+
+	// Keep following the OS preference while it changes
+	useEffect(() => {
+		const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+		const listener = (e: MediaQueryListEvent) => setSystemTheme(e.matches ? "dark" : "light");
+
+		mediaQuery.addEventListener("change", listener);
+		return () => mediaQuery.removeEventListener("change", listener);
+	}, []);
 
 	useLayoutEffect(() => {
 		const root = window.document.documentElement;
 
 		root.classList.remove("light", "dark");
-
-		if (theme === "system") {
-			const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-			const systemTheme = mediaQuery.matches ? "dark" : "light";
-
-			root.classList.add(systemTheme);
-
-			const listener = (e: MediaQueryListEvent) => {
-				root.classList.remove("light", "dark");
-				root.classList.add(e.matches ? "dark" : "light");
-			};
-
-			mediaQuery.addEventListener("change", listener);
-			return () => mediaQuery.removeEventListener("change", listener);
-		}
-
 		root.classList.add(theme);
 	}, [theme]);
 
-	const setTheme = useCallback(
-		(theme: Theme) => {
-			localStorage.setItem(storageKey, theme);
-			setThemeState(theme);
-		},
-		[storageKey]
-	);
+	const toggleTheme = useCallback(() => {
+		const next: Theme = theme === "dark" ? "light" : "dark";
 
-	const value = useMemo(() => ({ theme, setTheme }), [theme, setTheme]);
+		if (next === getSystemTheme()) {
+			// Back in sync with the OS: drop the override and keep following it
+			localStorage.removeItem(storageKey);
+			setOverride(null);
+			setSystemTheme(next);
+		} else {
+			localStorage.setItem(storageKey, next);
+			setOverride(next);
+		}
+	}, [theme, storageKey]);
+
+	const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
 
 	return <ThemeProviderContext.Provider value={value}>{children}</ThemeProviderContext.Provider>;
 }

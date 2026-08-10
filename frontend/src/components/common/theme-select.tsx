@@ -1,52 +1,33 @@
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Moon, Sun, SunMoon } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export function ThemeToggle() {
 	const { t } = useTranslation();
-	const { setTheme, theme } = useTheme();
+	const { theme, toggleTheme } = useTheme();
 
 	return (
-		<DropdownMenu>
-			<Tooltip>
-				<TooltipTrigger
-					render={
-						<DropdownMenuTrigger
-							render={<Button variant="outline" size="icon" aria-label={t("theme.tooltip")} />}
-						/>
-					}
-				>
-					{theme === "light" && <Sun className="size-5" />}
-					{theme === "dark" && <Moon className="size-5" />}
-					{theme === "system" && <SunMoon className="size-5" />}
-				</TooltipTrigger>
-				<TooltipContent>
-					<p>{t("theme.tooltip")}</p>
-				</TooltipContent>
-			</Tooltip>
-
-			<DropdownMenuContent align="end">
-				<DropdownMenuItem className="gap-4 text-lg" onClick={() => setTheme("system")}>
-					<SunMoon className="size-5" />
-					{t("theme.system")}
-				</DropdownMenuItem>
-				<DropdownMenuItem className="gap-4 text-lg" onClick={() => setTheme("light")}>
-					<Sun className="size-5" />
-					{t("theme.light")}
-				</DropdownMenuItem>
-				<DropdownMenuItem className="gap-4 text-lg" onClick={() => setTheme("dark")}>
-					<Moon className="size-5" />
-					{t("theme.dark")}
-				</DropdownMenuItem>
-			</DropdownMenuContent>
-		</DropdownMenu>
+		<Tooltip>
+			<TooltipTrigger
+				render={
+					<Button
+						variant="outline"
+						size="icon"
+						className="relative"
+						aria-label={t("theme.tooltip")}
+						aria-pressed={theme === "dark"}
+						onClick={toggleTheme}
+					/>
+				}
+			>
+				<Sun className="size-5 scale-100 rotate-0 transition-transform duration-300 dark:scale-0 dark:-rotate-90" />
+				<Moon className="absolute size-5 scale-0 rotate-90 transition-transform duration-300 dark:scale-100 dark:rotate-0" />
+			</TooltipTrigger>
+			<TooltipContent>
+				<p>{t("theme.tooltip")}</p>
+			</TooltipContent>
+		</Tooltip>
 	);
 }

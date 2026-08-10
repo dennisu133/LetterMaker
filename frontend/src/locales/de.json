@@ -8,10 +8,7 @@
 		"dateLocale": "de"
 	},
 	"theme": {
-		"tooltip": "Design umschalten",
-		"light": "Hell",
-		"dark": "Dunkel",
-		"system": "System"
+		"tooltip": "Design umschalten"
 	},
 	"button": {
 		"stamp": "Briefmarke hochladen",

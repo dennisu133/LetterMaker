@@ -6,8 +6,8 @@ import { FormalitiesProvider, useFormalities } from "@/components/formalities-pr
 import { ThemeProvider, useTheme } from "@/components/theme-provider";
 
 function ThemeProbe() {
-	const { theme, setTheme } = useTheme();
-	return <button onClick={() => setTheme("dark")}>{theme}</button>;
+	const { theme, toggleTheme } = useTheme();
+	return <button onClick={toggleTheme}>{theme}</button>;
 }
 
 function FormalitiesProbe() {
@@ -16,16 +16,18 @@ function FormalitiesProbe() {
 }
 
 describe("preference providers", () => {
-	it("applies and persists theme changes", async () => {
+	it("follows the system theme until manually overridden", async () => {
 		const user = userEvent.setup();
 		render(
-			<ThemeProvider defaultTheme="light">
+			<ThemeProvider>
 				<ThemeProbe />
 			</ThemeProvider>
 		);
 
+		// The mocked matchMedia reports a light system preference
 		expect(screen.getByRole("button", { name: "light" })).toBeVisible();
 		expect(document.documentElement).toHaveClass("light");
+		expect(localStorage.getItem("theme")).toBeNull();
 
 		await user.click(screen.getByRole("button", { name: "light" }));
 
@@ -34,11 +36,30 @@ describe("preference providers", () => {
 		expect(localStorage.getItem("theme")).toBe("dark");
 	});
 
-	it("ignores invalid stored themes", () => {
-		localStorage.setItem("theme", "ultraviolet");
+	it("clears the override when toggling back to the system theme", async () => {
+		const user = userEvent.setup();
+		localStorage.setItem("theme", "dark");
 
 		render(
-			<ThemeProvider defaultTheme="light">
+			<ThemeProvider>
+				<ThemeProbe />
+			</ThemeProvider>
+		);
+
+		expect(screen.getByRole("button", { name: "dark" })).toBeVisible();
+
+		await user.click(screen.getByRole("button", { name: "dark" }));
+
+		expect(screen.getByRole("button", { name: "light" })).toBeVisible();
+		expect(document.documentElement).toHaveClass("light");
+		expect(localStorage.getItem("theme")).toBeNull();
+	});
+
+	it.each(["ultraviolet", "system"])("ignores invalid or legacy stored theme %j", (value) => {
+		localStorage.setItem("theme", value);
+
+		render(
+			<ThemeProvider>
 				<ThemeProbe />
 			</ThemeProvider>
 		);
