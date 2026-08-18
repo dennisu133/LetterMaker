@@ -1,11 +1,4 @@
-import {
-	Field,
-	FieldError,
-	FieldGroup,
-	FieldLabel,
-	FieldLegend,
-	FieldSet
-} from "@/components/ui/field";
+import { Field, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { FormValues, ManualFormValues } from "@/lib/formSchema";
@@ -39,24 +32,24 @@ export function AddressSection({ kind, className }: AddressSectionProps) {
 	const isRecipient = kind === "recipient";
 
 	return (
-		<FieldSet
+		<fieldset
 			className={cn(
-				"m-0 gap-1 border-0 bg-transparent p-0",
+				"m-0 flex flex-col gap-1 border-0 bg-transparent p-0",
 				// The recipient block mimics the envelope's address window
 				isRecipient &&
 					"bg-paper-foreground/2 border-paper-line max-w-sm gap-1 rounded-[2px] border border-solid p-3 sm:p-4",
 				className
 			)}
 		>
-			<FieldLegend className={cn("paper-label float-left mb-2 w-full p-0")}>
+			<legend className="paper-label float-left mb-2 w-full p-0 text-sm font-medium">
 				{t(`contact.${kind}`)}
-			</FieldLegend>
-			<FieldGroup className={cn("gap-2", isRecipient && "gap-3")}>
+			</legend>
+			<div className={cn("flex w-full flex-col gap-2", isRecipient && "gap-3")}>
 				<Field data-invalid={!!nameError}>
-					<FieldLabel htmlFor={nameField} className="sr-only">
+					<label htmlFor={nameField} className="sr-only">
 						{t("contact.name.label")}
 						{isRecipient && " *"}
-					</FieldLabel>
+					</label>
 					<Input
 						id={nameField}
 						maxLength={MAX_INPUT}
@@ -75,10 +68,10 @@ export function AddressSection({ kind, className }: AddressSectionProps) {
 				</Field>
 
 				<Field data-invalid={!!addressError}>
-					<FieldLabel htmlFor={addressField} className="sr-only">
+					<label htmlFor={addressField} className="sr-only">
 						{t("contact.address.label")}
 						{isRecipient && " *"}
-					</FieldLabel>
+					</label>
 					<Textarea
 						id={addressField}
 						maxLength={MAX_TEXT_AREA}
@@ -98,7 +91,7 @@ export function AddressSection({ kind, className }: AddressSectionProps) {
 						{addressError && t(`form.validation.${addressField}`)}
 					</FieldError>
 				</Field>
-			</FieldGroup>
-		</FieldSet>
+			</div>
+		</fieldset>
 	);
 }

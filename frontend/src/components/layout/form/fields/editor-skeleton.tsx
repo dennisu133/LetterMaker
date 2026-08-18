@@ -14,7 +14,7 @@ import * as React from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field } from "@/components/ui/field";
 import { Separator } from "@/components/ui/separator";
 import { Toggle } from "@/components/ui/toggle";
 
@@ -58,9 +58,9 @@ export function ContentSectionSkeleton() {
 			aria-hidden="true"
 			inert
 		>
-			<FieldLabel htmlFor="content" className="sr-only">
+			<label htmlFor="content" className="sr-only">
 				{t("content.editor.label") + "\u2009*"}
-			</FieldLabel>
+			</label>
 			<div className="flex flex-1 flex-col">
 				<div className={toolbarClass}>
 					<Button variant="ghost" size="sm" type="button" className={toolbarDropdownButtonClass}>

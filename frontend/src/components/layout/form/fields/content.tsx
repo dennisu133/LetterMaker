@@ -6,14 +6,8 @@ import { useTranslation } from "react-i18next";
 import { Formalities } from "@/components/common/formalities";
 import { useFormalities } from "@/components/formalities-provider";
 import { Button } from "@/components/ui/button";
-import {
-	ComboboxContent,
-	ComboboxFreeForm,
-	ComboboxFreeFormInput,
-	ComboboxItem,
-	ComboboxList
-} from "@/components/ui/combobox";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { FreeFormCombobox } from "@/components/ui/combobox";
+import { Field, FieldError } from "@/components/ui/field";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
@@ -72,9 +66,9 @@ export function DetailsSection() {
 		<div className="mt-5 flex flex-col gap-4 sm:mt-7 sm:gap-5">
 			{/* The date sits right-aligned like on a printed letter */}
 			<Field data-invalid={!!errors.date} className="items-end [&>*]:w-auto">
-				<FieldLabel htmlFor="date" className="sr-only">
+				<label htmlFor="date" className="sr-only">
 					{t("content.date.label") + "\u2009*"}
-				</FieldLabel>
+				</label>
 				<Controller
 					name="date"
 					control={control}
@@ -128,9 +122,9 @@ export function DetailsSection() {
 
 			{/* Subject: the bold line of the letter */}
 			<Field data-invalid={!!errors.subject}>
-				<FieldLabel htmlFor="subject" className="sr-only">
+				<label htmlFor="subject" className="sr-only">
 					{t("content.subject.label") + "\u2009*"}
-				</FieldLabel>
+				</label>
 				<Controller
 					name="subject"
 					control={control}
@@ -156,40 +150,28 @@ export function DetailsSection() {
 
 			{/* Salutation with its quiet language + comma helpers */}
 			<Field data-invalid={!!errors.salutation}>
-				<FieldLabel htmlFor="salutation" className="sr-only">
+				<label htmlFor="salutation" className="sr-only">
 					{t("content.salutation.label")}
-				</FieldLabel>
+				</label>
 				<div className="flex items-end gap-2">
 					<Formalities tooltip="content.salutation.tooltip" />
 					<Controller
 						name="salutation"
 						control={control}
 						render={({ field, fieldState }) => (
-							<ComboboxFreeForm
+							<FreeFormCombobox
 								items={salutations}
 								value={field.value}
 								onValueChange={field.onChange}
-							>
-								<ComboboxFreeFormInput
-									id="salutation"
-									maxLength={MAX_INPUT}
-									placeholder={t("content.salutation.placeholder")}
-									className={cn(inkInput, "flex-1 text-[1.05rem] md:text-[1.05rem]")}
-									onBlur={field.onBlur}
-									triggerAriaLabel={t("content.salutation.label")}
-									aria-invalid={!!fieldState.error}
-									aria-describedby={fieldState.error ? "salutation-error" : undefined}
-								/>
-								<ComboboxContent>
-									<ComboboxList>
-										{(item) => (
-											<ComboboxItem key={item} value={item}>
-												{item}
-											</ComboboxItem>
-										)}
-									</ComboboxList>
-								</ComboboxContent>
-							</ComboboxFreeForm>
+								id="salutation"
+								maxLength={MAX_INPUT}
+								placeholder={t("content.salutation.placeholder")}
+								className={cn(inkInput, "flex-1 text-[1.05rem] md:text-[1.05rem]")}
+								onBlur={field.onBlur}
+								triggerAriaLabel={t("content.salutation.label")}
+								aria-invalid={!!fieldState.error}
+								aria-describedby={fieldState.error ? "salutation-error" : undefined}
+							/>
 						)}
 					/>
 

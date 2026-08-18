@@ -14,7 +14,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Field, FieldError } from "@/components/ui/field";
 import { Separator } from "@/components/ui/separator";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -480,9 +480,9 @@ export function ContentSection() {
 			className="group/editor mt-5 flex min-h-0 flex-1 flex-col gap-1 sm:mt-6"
 			data-invalid={hasError}
 		>
-			<FieldLabel htmlFor="content" className="sr-only">
+			<label htmlFor="content" className="sr-only">
 				{t("content.editor.label") + "\u2009*"}
-			</FieldLabel>
+			</label>
 			<Controller
 				name="content"
 				control={control}

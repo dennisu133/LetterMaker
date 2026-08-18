@@ -5,14 +5,8 @@ import { useTranslation } from "react-i18next";
 import { Formalities } from "@/components/common/formalities";
 import { useFormalities } from "@/components/formalities-provider";
 import { FormActions } from "@/components/layout/form/fields/actions";
-import {
-	ComboboxContent,
-	ComboboxFreeForm,
-	ComboboxFreeFormInput,
-	ComboboxItem,
-	ComboboxList
-} from "@/components/ui/combobox";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { FreeFormCombobox } from "@/components/ui/combobox";
+import { Field, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { MAX_INPUT, MAX_TEXT_AREA } from "@/lib/constants";
 import type { FormValues } from "@/lib/formSchema";
@@ -59,36 +53,28 @@ export function ClosingSection() {
 	return (
 		<div className="mt-auto grid grid-cols-1 items-end gap-4 pt-5 sm:grid-cols-[3fr_2fr_auto] sm:gap-8 sm:pt-6">
 			<Field data-invalid={!!errors.closing}>
-				<FieldLabel htmlFor="closing" className="sr-only">
+				<label htmlFor="closing" className="sr-only">
 					{t("content.closing.label")}
-				</FieldLabel>
+				</label>
 				<div className="flex items-end gap-2">
 					<Formalities tooltip="content.closing.tooltip" />
 					<Controller
 						name="closing"
 						control={control}
 						render={({ field, fieldState }) => (
-							<ComboboxFreeForm items={closings} value={field.value} onValueChange={field.onChange}>
-								<ComboboxFreeFormInput
-									id="closing"
-									maxLength={MAX_INPUT}
-									className={cn(inkInput, "flex-1 text-[1.05rem] md:text-[1.05rem]")}
-									placeholder={t("content.closing.placeholder")}
-									onBlur={field.onBlur}
-									triggerAriaLabel={t("content.closing.label")}
-									aria-invalid={!!fieldState.error}
-									aria-describedby={fieldState.error ? "closing-error" : undefined}
-								/>
-								<ComboboxContent>
-									<ComboboxList>
-										{(item) => (
-											<ComboboxItem key={item} value={item}>
-												{item}
-											</ComboboxItem>
-										)}
-									</ComboboxList>
-								</ComboboxContent>
-							</ComboboxFreeForm>
+							<FreeFormCombobox
+								items={closings}
+								value={field.value}
+								onValueChange={field.onChange}
+								id="closing"
+								maxLength={MAX_INPUT}
+								className={cn(inkInput, "flex-1 text-[1.05rem] md:text-[1.05rem]")}
+								placeholder={t("content.closing.placeholder")}
+								onBlur={field.onBlur}
+								triggerAriaLabel={t("content.closing.label")}
+								aria-invalid={!!fieldState.error}
+								aria-describedby={fieldState.error ? "closing-error" : undefined}
+							/>
 						)}
 					/>
 				</div>
@@ -97,9 +83,9 @@ export function ClosingSection() {
 
 			{/* The signature is rendered in a handwriting face, like a signed letter */}
 			<Field data-invalid={!!errors.signature}>
-				<FieldLabel htmlFor="signature" className="sr-only">
+				<label htmlFor="signature" className="sr-only">
 					{t("content.signature.label") + "\u2009*"}
-				</FieldLabel>
+				</label>
 				<Controller
 					name="signature"
 					control={control}
