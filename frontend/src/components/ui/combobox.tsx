@@ -32,7 +32,7 @@ export function FreeFormCombobox({
 				data-slot="input-group"
 				role="group"
 				className={cn(
-					"border-input dark:bg-input/30 has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-ring/50 has-[[data-slot][aria-invalid=true]]:ring-destructive/20 has-[[data-slot][aria-invalid=true]]:border-destructive dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40 has-disabled:bg-input/50 dark:has-disabled:bg-input/80 group/input-group relative flex h-8 w-auto min-w-0 items-center rounded-none border transition-colors outline-none has-disabled:opacity-50 has-[[data-slot=input-group-control]:focus-visible]:ring-1 has-[[data-slot][aria-invalid=true]]:ring-1 has-[>[data-align=inline-end]]:[&>input]:pr-1.5",
+					"border-input dark:bg-input/30 has-[[data-slot=input-group-control]:focus-visible]:border-paper-foreground has-[[data-slot][aria-invalid=true]]:border-destructive has-disabled:bg-input/50 dark:has-disabled:bg-input/80 flex h-8 min-w-0 items-center rounded-none border transition-colors has-disabled:opacity-50 has-[[data-slot=input-group-control]:focus-visible]:border-solid has-[[data-slot][aria-invalid=true]]:border-solid [&>input]:pr-1.5",
 					className
 				)}
 			>
@@ -48,20 +48,15 @@ export function FreeFormCombobox({
 					onChange={(event) => onValueChange(event.target.value)}
 					{...props}
 				/>
-				<div
-					role="group"
-					data-slot="input-group-addon"
-					data-align="inline-end"
-					className="text-muted-foreground order-last flex h-auto cursor-text items-center justify-center pr-2 select-none"
-				>
+				<div role="group" data-slot="input-group-addon" className="flex items-center pr-2">
 					<ComboboxPrimitive.Trigger
 						render={<Button type="button" variant="ghost" size="icon-xs" />}
 						data-slot="input-group-button"
-						className="mr-[-0.3rem] shadow-none data-pressed:bg-transparent"
+						className="mr-[-0.3rem] data-pressed:bg-transparent"
 						disabled={disabled}
 						aria-label={triggerAriaLabel}
 					>
-						<ChevronDownIcon className="text-muted-foreground pointer-events-none size-4" />
+						<ChevronDownIcon className="text-muted-foreground size-4" />
 					</ComboboxPrimitive.Trigger>
 				</div>
 			</div>
@@ -75,18 +70,15 @@ export function FreeFormCombobox({
 				>
 					<ComboboxPrimitive.Popup
 						data-slot="combobox-content"
-						className="bg-popover text-popover-foreground data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 ring-foreground/10 relative max-h-72 w-(--anchor-width) max-w-(--available-width) min-w-36 origin-(--transform-origin) overflow-hidden rounded-none shadow-md ring-1 duration-100 data-empty:shadow-none data-empty:ring-0"
+						className="bg-popover text-popover-foreground data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 ring-foreground/10 w-(--anchor-width) max-w-(--available-width) min-w-36 origin-(--transform-origin) rounded-none shadow-md ring-1 duration-100 data-empty:shadow-none data-empty:ring-0"
 					>
-						<ComboboxPrimitive.List
-							data-slot="combobox-list"
-							className="no-scrollbar max-h-[min(calc(--spacing(72)---spacing(9)),calc(var(--available-height)---spacing(9)))] scroll-py-1 overflow-y-auto overscroll-contain data-empty:p-0"
-						>
+						<ComboboxPrimitive.List data-slot="combobox-list" className="max-h-72 overflow-y-auto">
 							{(item: string) => (
 								<ComboboxPrimitive.Item
 									key={item}
 									value={item}
 									data-slot="combobox-item"
-									className="data-highlighted:bg-accent data-highlighted:text-accent-foreground not-data-[variant=destructive]:data-highlighted:**:text-accent-foreground relative flex w-full cursor-default items-center gap-2 rounded-none py-2 pr-8 pl-2 text-xs outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50"
+									className="data-highlighted:bg-accent data-highlighted:text-accent-foreground relative flex cursor-default items-center py-2 pr-8 pl-2 text-xs outline-hidden select-none"
 								>
 									{item}
 									<ComboboxPrimitive.ItemIndicator
