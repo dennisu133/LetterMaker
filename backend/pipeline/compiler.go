@@ -1,7 +1,6 @@
 package pipeline
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"os"
@@ -81,14 +80,8 @@ func (c *Compiler) Compile(ctx context.Context, job *PreparedJob) ([]byte, error
 	// absolute paths or parent directories.
 	cmd.Env = append(os.Environ(), "openin_any=p", "openout_any=p")
 
-	// Capture stdout and stderr
-	var outputBuf bytes.Buffer
-	cmd.Stdout = &outputBuf
-	cmd.Stderr = &outputBuf
-
-	// Run pdflatex
-	err = cmd.Run()
-	logOutput := outputBuf.String()
+	output, err := cmd.CombinedOutput()
+	logOutput := string(output)
 
 	// Check for timeout
 	if ctx.Err() == context.DeadlineExceeded {
