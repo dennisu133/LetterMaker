@@ -1,5 +1,6 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import * as React from "react";
-import { FormProvider, useForm, type Resolver } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useFormActionsRegister, useStamp } from "@/components/form-actions-provider";
@@ -11,35 +12,7 @@ import { SubmissionProvider, useSubmission } from "@/components/submission-provi
 import { openPdfInNewTab, submitLetter } from "@/lib/api";
 import { todayLocalDate } from "@/lib/date";
 import { createEmptyFormValues } from "@/lib/formDefaults";
-import type { FormValues } from "@/lib/formSchema";
-
-const lazyFormResolver: Resolver<FormValues> = async (values, context, options) => {
-	const [{ zodResolver }, { formSchema }] = await Promise.all([
-		import("@hookform/resolvers/zod"),
-		import("@/lib/formSchema")
-	]);
-
-	return zodResolver(formSchema)(values, context, options);
-};
-
-// Fetch the validation chunks once the browser is idle so the first submit
-// doesn't have to wait for them.
-function useWarmFormResolver() {
-	React.useEffect(() => {
-		const warmUp = () => {
-			void import("@hookform/resolvers/zod");
-			void import("@/lib/formSchema");
-		};
-
-		if ("requestIdleCallback" in window) {
-			const id = requestIdleCallback(warmUp);
-			return () => cancelIdleCallback(id);
-		}
-
-		const id = setTimeout(warmUp, 2000);
-		return () => clearTimeout(id);
-	}, []);
-}
+import { formSchema, type FormValues } from "@/lib/formSchema";
 
 // Keep the tiptap editor out of the critical chunk; a flex spacer holds the
 // layout until it arrives.
@@ -55,11 +28,9 @@ function LetterFormContent() {
 	const { setSubmitting, setError } = useSubmission();
 
 	const form = useForm<FormValues>({
-		resolver: lazyFormResolver,
+		resolver: zodResolver(formSchema),
 		defaultValues: createEmptyFormValues()
 	});
-
-	useWarmFormResolver();
 
 	// Sync form mode with stamp context
 	// When a stamp is uploaded via navbar, switch to stamp mode
