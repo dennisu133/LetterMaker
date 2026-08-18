@@ -37,11 +37,11 @@ export function AddressSection({ kind, className }: AddressSectionProps) {
 				"m-0 flex flex-col gap-1 border-0 bg-transparent p-0",
 				// The recipient block mimics the envelope's address window
 				isRecipient &&
-					"bg-paper-foreground/2 border-paper-line max-w-sm gap-1 rounded-[2px] border border-solid p-3 sm:p-4",
+					"bg-paper-foreground/2 border-paper-line max-w-sm gap-1 rounded-xs border border-solid p-3 sm:p-4",
 				className
 			)}
 		>
-			<legend className="paper-label float-left mb-2 w-full p-0 text-sm font-medium">
+			<legend className="text-paper-muted float-left mb-2 w-full p-0 text-sm font-medium tracking-[0.08em] uppercase">
 				{t(`contact.${kind}`)}
 			</legend>
 			<div className={cn("flex w-full flex-col gap-2", isRecipient && "gap-3")}>
