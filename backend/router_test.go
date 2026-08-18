@@ -36,18 +36,18 @@ func testValidationConfig() pipeline.ValidationConfig {
 }
 
 // newTestEngine wires the create handler with a stub compiler.
-func newTestEngine(t *testing.T, compiler letterCompiler, semaphore *pipeline.Semaphore, maxBytes int64) *gin.Engine {
+func newTestEngine(t *testing.T, compiler letterCompiler, compileSlots chan struct{}, maxBytes int64) *gin.Engine {
 	t.Helper()
 	gin.SetMode(gin.TestMode)
 
 	validator := pipeline.NewValidator(testValidationConfig())
 	preparer := pipeline.NewPreparer(t.TempDir())
-	if semaphore == nil {
-		semaphore = pipeline.NewSemaphore(2)
+	if compileSlots == nil {
+		compileSlots = make(chan struct{}, 2)
 	}
 
 	r := gin.New()
-	r.POST("/api/create", maxBodySize(maxBytes), handleCreateLetter(validator, preparer, compiler, semaphore))
+	r.POST("/api/create", maxBodySize(maxBytes), handleCreateLetter(validator, preparer, compiler, compileSlots))
 	return r
 }
 
@@ -169,15 +169,11 @@ func TestCreateLetterErrorResponses(t *testing.T) {
 }
 
 func TestCreateLetterBusy(t *testing.T) {
-	semaphore := pipeline.NewSemaphore(1)
+	compileSlots := make(chan struct{}, 1)
 	// Occupy the only slot so the request finds the server busy
-	release, ok := semaphore.TryAcquire()
-	if !ok {
-		t.Fatal("failed to occupy semaphore")
-	}
-	defer release()
+	compileSlots <- struct{}{}
 
-	r := newTestEngine(t, stubCompiler{result: &pipeline.CompileResult{PDF: []byte("%PDF-")}}, semaphore, 5*1024*1024)
+	r := newTestEngine(t, stubCompiler{result: &pipeline.CompileResult{PDF: []byte("%PDF-")}}, compileSlots, 5*1024*1024)
 	body, ct := letterForm(t, nil)
 	w := postLetter(r, body, ct)
 

@@ -83,13 +83,13 @@ func NewRouter(config Config) (*gin.Engine, error) {
 	rateLimit := pipeline.RateLimitMiddleware(config.RateLimit)
 
 	// Create pipeline components with config
-	semaphore := pipeline.NewSemaphore(config.MaxConcurrent)
+	compileSlots := make(chan struct{}, config.MaxConcurrent)
 	validator := pipeline.NewValidator(config.Validation)
 	preparer := pipeline.NewPreparer(config.TmpDir)
 	compiler := pipeline.NewCompiler(config.CompileTimeout)
 
 	// Routes
-	r.POST("/api/create", rateLimit, maxBodySize(config.MaxRequestBytes), handleCreateLetter(validator, preparer, compiler, semaphore))
+	r.POST("/api/create", rateLimit, maxBodySize(config.MaxRequestBytes), handleCreateLetter(validator, preparer, compiler, compileSlots))
 	r.GET("/api/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
@@ -110,14 +110,14 @@ func respondError(c *gin.Context, status int, code, message string) {
 //  2. body size limit (handled by middleware)              -> Error: 413
 //  3. payload validation                                   -> Error: 422
 //  4. parsing (prosemirror > latex)                        -> Error: 422
-//  5. semaphore acquisition                                -> Error: 503
+//  5. compile slot acquisition                             -> Error: 503
 //  6. preparing (create temp dir with aux files)           -> Error: 500
 //  7. calling pdflatex (and merging stamp if provided)     -> Error: 500 / 408
 //  8. responding with the final PDF
 //
 // Validation errors (422) carry the user-facing reason; internal failures
 // (500) return a generic message and the details stay in the server log.
-func handleCreateLetter(validator *pipeline.Validator, preparer *pipeline.Preparer, compiler letterCompiler, semaphore *pipeline.Semaphore) gin.HandlerFunc {
+func handleCreateLetter(validator *pipeline.Validator, preparer *pipeline.Preparer, compiler letterCompiler, compileSlots chan struct{}) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Step 3: Bind and validate request
 		var req pipeline.LetterRequest
@@ -148,14 +148,15 @@ func handleCreateLetter(validator *pipeline.Validator, preparer *pipeline.Prepar
 			return
 		}
 
-		// Step 5: Acquire semaphore slot
-		release, ok := semaphore.TryAcquire()
-		if !ok {
-			log.Printf("[WARN] Server busy, semaphore full")
+		// Step 5: Acquire compile slot
+		select {
+		case compileSlots <- struct{}{}:
+			defer func() { <-compileSlots }()
+		default:
+			log.Printf("[WARN] Server busy, compile slots full")
 			respondError(c, http.StatusServiceUnavailable, "server_busy", "Server is busy. Please try again in a moment.")
 			return
 		}
-		defer release()
 
 		// Step 6: Prepare temp directory with LaTeX file
 		job, err := preparer.Prepare(&req, contentLatex)
@@ -171,7 +172,7 @@ func handleCreateLetter(validator *pipeline.Validator, preparer *pipeline.Prepar
 		}()
 
 		// Step 7: Compile PDF. Passing the request context frees the
-		// semaphore slot early when the client disconnects mid-compile.
+		// compile slot early when the client disconnects mid-compile.
 		result, err := compiler.Compile(c.Request.Context(), job)
 		if err != nil {
 			if c.Request.Context().Err() != nil {
