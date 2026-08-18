@@ -1,3 +1,5 @@
+/// <reference types="vitest/config" />
+
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
@@ -70,6 +72,28 @@ export default defineConfig({
 			resolveDependencies: (_filename, deps) => {
 				// Don't preload pdfjs - it's dynamically imported when needed
 				return deps.filter((dep) => !dep.includes("pdfjs"));
+			}
+		}
+	},
+	test: {
+		exclude: ["e2e/**", "node_modules/**", "dist/**"],
+		environment: "jsdom",
+		environmentOptions: {
+			jsdom: {
+				url: "http://localhost/"
+			}
+		},
+		setupFiles: ["./src/test/environment.ts", "./src/test/setup.ts"],
+		coverage: {
+			provider: "v8",
+			reporter: ["text", "html", "lcov"],
+			include: ["src/**/*.{ts,tsx}"],
+			exclude: ["src/components/ui/**", "src/test/**"],
+			thresholds: {
+				branches: 70,
+				functions: 75,
+				lines: 80,
+				statements: 80
 			}
 		}
 	}
