@@ -4,32 +4,64 @@ Backend for the LetterMaker application written in Go using [Gin](https://gin-go
 
 ## Prerequisites
 
+### Go
+
+Install Go 1.25.5 or later.
+
 ### LaTeX
 
-You will need pdfTeX and a few additional libraries ([see reference file for more details](/backend/reference/letter.tex)). All of the required packages are inside the `texlive-latex-extra` package.
+You will need pdfTeX and the TeX Live collections containing the packages used by the generated letters. The commands below install the required collections without installing the much larger `texlive-full` distribution.
+
+#### Ubuntu (recommended)
+
+```sh
+sudo apt update
+sudo apt install texlive-latex-extra
+```
+
+#### Arch Linux
+
+```sh
+sudo pacman -S --needed texlive-latexextra texlive-fontsrecommended texlive-plaingeneric
+```
 
 > [!NOTE]
-> If you encounter issues with rendering German characters try installing `texlive-lang-german`. This applies to other locales as well.
+> German locales require an additional language package:
+>
+> - Ubuntu: `sudo apt install texlive-lang-german`
+> - Arch Linux: `sudo pacman -S --needed texlive-langgerman`
+>
+> Other non-English locales require their corresponding TeX Live language package.
 
 ## Endpoints
 
-- /api/create: the main route for PDF creation
-- /api/health: returns a simple 200. Use for debugging and uptime monitoring (not rate limited).
+- `POST /api/create`: creates a PDF
+- `GET /api/health`: returns HTTP 200 for health monitoring (not rate limited)
 
 Errors are returned as JSON in the shape `{"error": "...", "code": "..."}`.
 
 ## Environment variables
 
-The limits can be greatly configured using environment variables. The program uses [godotenv](https://github.com/joho/godotenv) to parse local .env files, even during production. Just make sure they are in the same directory as the binary.
+Backend settings can be configured using environment variables. When present, [godotenv](https://github.com/joho/godotenv) loads `.env` from the process's current working directory, including in production.
 
-Simply rename [.env.example](/backend/.env.example) to .env and adjust the values if needed. The configuration is validated on startup; the server refuses to start if a value is broken (e.g. `RATE_LIMIT_BURST=0`).
+Copy [.env.example](/backend/.env.example) and adjust the values if needed:
+
+```sh
+cp .env.example .env
+```
+
+The configuration is validated on startup; the server refuses to start if a value is broken (e.g. `RATE_LIMIT_BURST=0`).
 
 > [!IMPORTANT]
 > Client IPs for rate limiting are resolved through Gin's trusted-proxy handling. When running behind a reverse proxy, set `TRUSTED_PROXIES` to the proxy addresses; when behind Cloudflare, additionally set `TRUSTED_PLATFORM=cloudflare`. Forwarding headers from untrusted sources are ignored.
 
 ## Development
 
-Run using `go run .`. Make sure GIN_MODE is set to debug (default).
+```sh
+go run .
+```
+
+`GIN_MODE` defaults to `debug`.
 
 ## Testing
 
