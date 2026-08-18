@@ -1,29 +1,14 @@
 import { cn } from "@/lib/utils";
 
 function Field({ className, ...props }: React.ComponentProps<"div">) {
-	return (
-		<div
-			role="group"
-			data-slot="field"
-			className={cn(
-				"data-[invalid=true]:text-destructive group/field flex w-full flex-col gap-1",
-				className
-			)}
-			{...props}
-		/>
-	);
+	return <div role="group" className={cn("flex flex-col gap-1", className)} {...props} />;
 }
 
 function FieldError({ className, children, ...props }: React.ComponentProps<"div">) {
 	if (!children) return null;
 
 	return (
-		<div
-			role="alert"
-			data-slot="field-error"
-			className={cn("text-destructive text-xs font-normal", className)}
-			{...props}
-		>
+		<div role="alert" className={cn("text-destructive text-xs", className)} {...props}>
 			{children}
 		</div>
 	);
