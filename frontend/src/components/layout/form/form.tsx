@@ -33,8 +33,6 @@ function LetterFormContent() {
 	});
 
 	// Sync form mode with stamp context
-	// When a stamp is uploaded via navbar, switch to stamp mode
-	// When stamp is cleared, switch back to manual mode
 	React.useEffect(() => {
 		if (stamp.isValid && stamp.file) {
 			// Switch to stamp mode and set the file
@@ -52,45 +50,30 @@ function LetterFormContent() {
 	React.useEffect(() => {
 		registerActions({
 			fillExample: () => {
-				// Example content is already ProseMirror JSON in the translation file
-				const exampleContentJson = t("example.content");
+				const commonValues = {
+					date: todayLocalDate(),
+					subject: t("example.subject"),
+					salutation: t("example.salutation"),
+					salutationComma: true,
+					// Example content is already ProseMirror JSON in the translation file
+					content: t("example.content"),
+					closing: t("example.closing"),
+					signature: t("example.signature")
+				};
 
-				if (stamp.isValid && stamp.file) {
-					// Stamp mode: fill only the common fields, keep the stamp
-					form.reset(
-						{
-							mode: "stamp",
-							stampFile: stamp.file,
-							date: todayLocalDate(),
-							subject: t("example.subject"),
-							salutation: t("example.salutation"),
-							salutationComma: true,
-							content: exampleContentJson,
-							closing: t("example.closing"),
-							signature: t("example.signature")
-						},
-						{ keepDefaultValues: true }
-					);
-				} else {
-					// Manual mode: fill all fields including addresses
-					form.reset(
-						{
-							mode: "manual",
-							date: todayLocalDate(),
-							senderName: t("example.senderName"),
-							senderAddress: t("example.senderAddress"),
-							recipientName: t("example.recipientName"),
-							recipientAddress: t("example.recipientAddress"),
-							subject: t("example.subject"),
-							salutation: t("example.salutation"),
-							salutationComma: true,
-							content: exampleContentJson,
-							closing: t("example.closing"),
-							signature: t("example.signature")
-						},
-						{ keepDefaultValues: true }
-					);
-				}
+				const values =
+					stamp.isValid && stamp.file
+						? { ...commonValues, mode: "stamp" as const, stampFile: stamp.file }
+						: {
+								...commonValues,
+								mode: "manual" as const,
+								senderName: t("example.senderName"),
+								senderAddress: t("example.senderAddress"),
+								recipientName: t("example.recipientName"),
+								recipientAddress: t("example.recipientAddress")
+							};
+
+				form.reset(values, { keepDefaultValues: true });
 			}
 		});
 	}, [registerActions, form, t, stamp.isValid, stamp.file]);
@@ -105,7 +88,6 @@ function LetterFormContent() {
 					data.salutationComma && data.salutation ? `${data.salutation},` : data.salutation;
 				const locale = t("language.dateLocale") as string;
 				const finalData = { ...data, salutation, locale };
-				delete (finalData as Record<string, unknown>).salutationComma;
 
 				const result = await submitLetter(finalData);
 
@@ -121,26 +103,17 @@ function LetterFormContent() {
 		[setSubmitting, setError, t]
 	);
 
-	const handleFormSubmit = React.useCallback(
-		(e: React.FormEvent<HTMLFormElement>) => {
-			form.handleSubmit(onSubmit)(e);
-		},
-		[form, onSubmit]
-	);
-
 	return (
 		<FormProvider {...form}>
 			<form
-				onSubmit={handleFormSubmit}
+				onSubmit={form.handleSubmit(onSubmit)}
 				noValidate
-				className="flex w-full flex-1 flex-col items-center px-2 py-4 sm:px-6 sm:py-6"
+				className="flex flex-1 flex-col items-center px-2 py-4 sm:px-6 sm:py-6"
 			>
 				<div className="letter-sheet flex w-full max-w-6xl flex-1 flex-col px-5 py-6 sm:px-10 sm:py-8">
 					{/* Letterhead: sender and recipient window left, stamp corner right */}
-					<div className="flex flex-col-reverse gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
-						{stamp.isValid ? (
-							<div className="hidden flex-1 sm:block" aria-hidden="true" />
-						) : (
+					<div className="flex flex-col-reverse gap-4 sm:flex-row sm:items-start sm:justify-end sm:gap-8">
+						{!stamp.isValid && (
 							<div className="flex flex-1 flex-col gap-4 md:flex-row md:gap-10">
 								<AddressSection kind="sender" className="flex-1 md:max-w-xs" />
 								<AddressSection kind="recipient" className="flex-1 md:max-w-sm" />
