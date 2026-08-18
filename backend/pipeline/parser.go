@@ -73,8 +73,7 @@ type PMNode struct {
 
 // PMMark represents a text mark (bold, italic, underline, etc.).
 type PMMark struct {
-	Type  string         `json:"type"`
-	Attrs map[string]any `json:"attrs,omitempty"`
+	Type string `json:"type"`
 }
 
 // PMAttrs holds optional node attributes.
@@ -122,20 +121,16 @@ func ParseProseMirrorToLatex(jsonStr string) (string, error) {
 	}
 
 	var sb strings.Builder
-	if err := renderNodes(&sb, doc.Content, false); err != nil {
-		return "", err
-	}
+	renderNodes(&sb, doc.Content, false)
 
 	return strings.TrimSpace(sb.String()), nil
 }
 
 // renderNodes renders a slice of nodes to the string builder.
 // inList indicates whether we're inside a list (affects paragraph handling).
-func renderNodes(sb *strings.Builder, nodes []PMNode, inList bool) error {
+func renderNodes(sb *strings.Builder, nodes []PMNode, inList bool) {
 	for i, node := range nodes {
-		if err := renderNode(sb, node, inList); err != nil {
-			return err
-		}
+		renderNode(sb, node, inList)
 
 		// Add paragraph separation (but not after the last node)
 		if node.Type == "paragraph" && !inList && i < len(nodes)-1 {
@@ -147,54 +142,49 @@ func renderNodes(sb *strings.Builder, nodes []PMNode, inList bool) error {
 			}
 		}
 	}
-	return nil
 }
 
 // renderNode renders a single node to the string builder.
-func renderNode(sb *strings.Builder, node PMNode, inList bool) error {
+func renderNode(sb *strings.Builder, node PMNode, inList bool) {
 	switch node.Type {
 	case "paragraph":
-		return renderParagraph(sb, node)
+		renderParagraph(sb, node)
 
 	case "text":
-		return renderText(sb, node)
+		renderText(sb, node)
 
 	case "bulletList":
-		return renderBulletList(sb, node)
+		renderBulletList(sb, node)
 
 	case "orderedList":
-		return renderOrderedList(sb, node)
+		renderOrderedList(sb, node)
 
 	case "listItem":
-		return renderListItem(sb, node)
+		renderListItem(sb, node)
 
 	case "heading":
-		return renderHeading(sb, node)
+		renderHeading(sb, node)
 
 	case "blockquote":
-		return renderBlockquote(sb, node)
+		renderBlockquote(sb, node)
 
 	case "hardBreak":
 		sb.WriteString(`\\`)
-		return nil
 
 	default:
 		// Unknown node type: try to extract text content safely
 		// This is a fallback for forward compatibility
-		return renderNodes(sb, node.Content, inList)
+		renderNodes(sb, node.Content, inList)
 	}
 }
 
-func renderParagraph(sb *strings.Builder, node PMNode) error {
+func renderParagraph(sb *strings.Builder, node PMNode) {
 	for _, child := range node.Content {
-		if err := renderNode(sb, child, false); err != nil {
-			return err
-		}
+		renderNode(sb, child, false)
 	}
-	return nil
 }
 
-func renderText(sb *strings.Builder, node PMNode) error {
+func renderText(sb *strings.Builder, node PMNode) {
 	text := EscapeLatex(node.Text)
 
 	// Apply marks in order (wrap with LaTeX commands)
@@ -213,52 +203,40 @@ func renderText(sb *strings.Builder, node PMNode) error {
 	}
 
 	sb.WriteString(text)
-	return nil
 }
 
-func renderBulletList(sb *strings.Builder, node PMNode) error {
+func renderBulletList(sb *strings.Builder, node PMNode) {
 	sb.WriteString("\n\\begin{itemize}\n")
 	for _, item := range node.Content {
-		if err := renderNode(sb, item, true); err != nil {
-			return err
-		}
+		renderNode(sb, item, true)
 	}
 	sb.WriteString("\\end{itemize}\n")
-	return nil
 }
 
-func renderOrderedList(sb *strings.Builder, node PMNode) error {
+func renderOrderedList(sb *strings.Builder, node PMNode) {
 	sb.WriteString("\n\\begin{enumerate}\n")
 	for _, item := range node.Content {
-		if err := renderNode(sb, item, true); err != nil {
-			return err
-		}
+		renderNode(sb, item, true)
 	}
 	sb.WriteString("\\end{enumerate}\n")
-	return nil
 }
 
-func renderListItem(sb *strings.Builder, node PMNode) error {
+func renderListItem(sb *strings.Builder, node PMNode) {
 	sb.WriteString("\\item ")
 	// List items contain paragraphs, render their content inline
 	for _, child := range node.Content {
 		if child.Type == "paragraph" {
 			for _, pChild := range child.Content {
-				if err := renderNode(sb, pChild, true); err != nil {
-					return err
-				}
+				renderNode(sb, pChild, true)
 			}
 		} else {
-			if err := renderNode(sb, child, true); err != nil {
-				return err
-			}
+			renderNode(sb, child, true)
 		}
 	}
 	sb.WriteString("\n")
-	return nil
 }
 
-func renderHeading(sb *strings.Builder, node PMNode) error {
+func renderHeading(sb *strings.Builder, node PMNode) {
 	// Add newline before heading for proper spacing
 	sb.WriteString("\n")
 
@@ -291,22 +269,16 @@ func renderHeading(sb *strings.Builder, node PMNode) error {
 
 	// Render heading content
 	for _, child := range node.Content {
-		if err := renderNode(sb, child, false); err != nil {
-			return err
-		}
+		renderNode(sb, child, false)
 	}
 
 	sb.WriteString("}\n")
-	return nil
 }
 
-func renderBlockquote(sb *strings.Builder, node PMNode) error {
+func renderBlockquote(sb *strings.Builder, node PMNode) {
 	sb.WriteString("\n\\begin{quote}\n")
 	for _, child := range node.Content {
-		if err := renderNode(sb, child, false); err != nil {
-			return err
-		}
+		renderNode(sb, child, false)
 	}
 	sb.WriteString("\n\\end{quote}")
-	return nil
 }
