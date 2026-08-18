@@ -11,9 +11,9 @@ export function Navbar() {
 	const formActions = useFormActions();
 
 	return (
-		<nav className="border-border/70 w-full border-b px-3 py-2 sm:px-6">
+		<nav className="border-border/70 border-b px-3 py-2 sm:px-6">
 			<div className="mx-auto flex max-w-6xl items-center justify-between gap-2">
-				<h1 className="shrink-0 font-serif text-lg font-semibold tracking-tight sm:text-xl">
+				<h1 className="shrink-0 font-serif text-lg font-semibold tracking-tight sm:text-2xl">
 					{t("title")}
 				</h1>
 
