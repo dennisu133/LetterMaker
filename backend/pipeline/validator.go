@@ -130,16 +130,16 @@ func (v *Validator) validateLetterRequestFields(req *LetterRequest) error {
 	if err := v.validateDate(req); err != nil {
 		return err
 	}
-	if err := v.validateSubject(req); err != nil {
+	if err := validateText(&req.Subject, "subject", v.cfg.MaxTextAreaLen, true); err != nil {
 		return err
 	}
-	if err := v.validateSalutation(req); err != nil {
+	if err := validateText(&req.Salutation, "salutation", v.cfg.MaxInputLen, false); err != nil {
 		return err
 	}
-	if err := v.validateClosing(req); err != nil {
+	if err := validateText(&req.Closing, "closing", v.cfg.MaxInputLen, false); err != nil {
 		return err
 	}
-	if err := v.validateSignature(req); err != nil {
+	if err := validateText(&req.Signature, "signature", v.cfg.MaxTextAreaLen, true); err != nil {
 		return err
 	}
 	if err := v.validateContent(req); err != nil {
@@ -209,50 +209,13 @@ func (v *Validator) validateDate(req *LetterRequest) error {
 	return nil
 }
 
-// validateSubject validates the subject field
-func (v *Validator) validateSubject(req *LetterRequest) error {
-	req.Subject = strings.TrimSpace(req.Subject)
-
-	if req.Subject == "" {
-		return fmt.Errorf("subject is required")
+func validateText(value *string, name string, max int, required bool) error {
+	*value = strings.TrimSpace(*value)
+	if required && *value == "" {
+		return fmt.Errorf("%s is required", name)
 	}
-
-	if utf8.RuneCountInString(req.Subject) > v.cfg.MaxTextAreaLen {
-		return fmt.Errorf("subject must be at most %d characters", v.cfg.MaxTextAreaLen)
-	}
-	return nil
-}
-
-// validateSalutation validates the optional salutation field
-func (v *Validator) validateSalutation(req *LetterRequest) error {
-	req.Salutation = strings.TrimSpace(req.Salutation)
-
-	if req.Salutation != "" && utf8.RuneCountInString(req.Salutation) > v.cfg.MaxInputLen {
-		return fmt.Errorf("salutation must be at most %d characters", v.cfg.MaxInputLen)
-	}
-	return nil
-}
-
-// validateClosing validates the optional closing field
-func (v *Validator) validateClosing(req *LetterRequest) error {
-	req.Closing = strings.TrimSpace(req.Closing)
-
-	if req.Closing != "" && utf8.RuneCountInString(req.Closing) > v.cfg.MaxInputLen {
-		return fmt.Errorf("closing must be at most %d characters", v.cfg.MaxInputLen)
-	}
-	return nil
-}
-
-// validateSignature validates the signature field
-func (v *Validator) validateSignature(req *LetterRequest) error {
-	req.Signature = strings.TrimSpace(req.Signature)
-
-	if req.Signature == "" {
-		return fmt.Errorf("signature is required")
-	}
-
-	if utf8.RuneCountInString(req.Signature) > v.cfg.MaxTextAreaLen {
-		return fmt.Errorf("signature must be at most %d characters", v.cfg.MaxTextAreaLen)
+	if utf8.RuneCountInString(*value) > max {
+		return fmt.Errorf("%s must be at most %d characters", name, max)
 	}
 	return nil
 }
@@ -276,35 +239,17 @@ func (v *Validator) validateContent(req *LetterRequest) error {
 
 // validateManualModeFields validates fields specific to manual mode
 func (v *Validator) validateManualModeFields(req *LetterRequest) error {
-	req.RecipientName = strings.TrimSpace(req.RecipientName)
-	req.RecipientAddress = strings.TrimSpace(req.RecipientAddress)
-	req.SenderName = strings.TrimSpace(req.SenderName)
-	req.SenderAddress = strings.TrimSpace(req.SenderAddress)
-
-	// Recipient name (required)
-	if req.RecipientName == "" {
-		return fmt.Errorf("recipient name is required")
+	if err := validateText(&req.RecipientName, "recipient name", v.cfg.MaxInputLen, true); err != nil {
+		return err
 	}
-	if utf8.RuneCountInString(req.RecipientName) > v.cfg.MaxInputLen {
-		return fmt.Errorf("recipient name must be at most %d characters", v.cfg.MaxInputLen)
+	if err := validateText(&req.RecipientAddress, "recipient address", v.cfg.MaxTextAreaLen, true); err != nil {
+		return err
 	}
-
-	// Recipient address (required)
-	if req.RecipientAddress == "" {
-		return fmt.Errorf("recipient address is required")
+	if err := validateText(&req.SenderName, "sender name", v.cfg.MaxInputLen, false); err != nil {
+		return err
 	}
-	if utf8.RuneCountInString(req.RecipientAddress) > v.cfg.MaxTextAreaLen {
-		return fmt.Errorf("recipient address must be at most %d characters", v.cfg.MaxTextAreaLen)
-	}
-
-	// Sender name (optional)
-	if req.SenderName != "" && utf8.RuneCountInString(req.SenderName) > v.cfg.MaxInputLen {
-		return fmt.Errorf("sender name must be at most %d characters", v.cfg.MaxInputLen)
-	}
-
-	// Sender address (optional)
-	if req.SenderAddress != "" && utf8.RuneCountInString(req.SenderAddress) > v.cfg.MaxTextAreaLen {
-		return fmt.Errorf("sender address must be at most %d characters", v.cfg.MaxTextAreaLen)
+	if err := validateText(&req.SenderAddress, "sender address", v.cfg.MaxTextAreaLen, false); err != nil {
+		return err
 	}
 
 	return nil
