@@ -17,12 +17,12 @@ import (
 
 // stubCompiler implements letterCompiler without running pdflatex.
 type stubCompiler struct {
-	result *pipeline.CompileResult
-	err    error
+	pdf []byte
+	err error
 }
 
-func (s stubCompiler) Compile(ctx context.Context, job *pipeline.PreparedJob) (*pipeline.CompileResult, error) {
-	return s.result, s.err
+func (s stubCompiler) Compile(ctx context.Context, job *pipeline.PreparedJob) ([]byte, error) {
+	return s.pdf, s.err
 }
 
 func testValidationConfig() pipeline.ValidationConfig {
@@ -101,7 +101,7 @@ func postLetter(r *gin.Engine, body *bytes.Buffer, contentType string) *httptest
 
 func TestCreateLetterSuccess(t *testing.T) {
 	pdf := []byte("%PDF-1.5 fake output")
-	r := newTestEngine(t, stubCompiler{result: &pipeline.CompileResult{PDF: pdf}}, nil, 5*1024*1024)
+	r := newTestEngine(t, stubCompiler{pdf: pdf}, nil, 5*1024*1024)
 
 	body, ct := letterForm(t, nil)
 	w := postLetter(r, body, ct)
@@ -149,7 +149,7 @@ func TestCreateLetterErrorResponses(t *testing.T) {
 		},
 	}
 
-	r := newTestEngine(t, stubCompiler{result: &pipeline.CompileResult{PDF: []byte("%PDF-")}}, nil, 5*1024*1024)
+	r := newTestEngine(t, stubCompiler{pdf: []byte("%PDF-")}, nil, 5*1024*1024)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			body, ct := letterForm(t, tt.overrides)
@@ -173,7 +173,7 @@ func TestCreateLetterBusy(t *testing.T) {
 	// Occupy the only slot so the request finds the server busy
 	compileSlots <- struct{}{}
 
-	r := newTestEngine(t, stubCompiler{result: &pipeline.CompileResult{PDF: []byte("%PDF-")}}, compileSlots, 5*1024*1024)
+	r := newTestEngine(t, stubCompiler{pdf: []byte("%PDF-")}, compileSlots, 5*1024*1024)
 	body, ct := letterForm(t, nil)
 	w := postLetter(r, body, ct)
 
@@ -186,7 +186,7 @@ func TestCreateLetterBusy(t *testing.T) {
 }
 
 func TestCreateLetterCompileFailure(t *testing.T) {
-	r := newTestEngine(t, stubCompiler{err: pipeline.NewCompileError("pdflatex exploded", "log")}, nil, 5*1024*1024)
+	r := newTestEngine(t, stubCompiler{err: pipeline.CompileError{Message: "pdflatex exploded", Log: "log"}}, nil, 5*1024*1024)
 	body, ct := letterForm(t, nil)
 	w := postLetter(r, body, ct)
 
@@ -202,7 +202,7 @@ func TestCreateLetterCompileFailure(t *testing.T) {
 }
 
 func TestCreateLetterCompileTimeout(t *testing.T) {
-	r := newTestEngine(t, stubCompiler{err: pipeline.NewCompileTimeoutError("log")}, nil, 5*1024*1024)
+	r := newTestEngine(t, stubCompiler{err: pipeline.CompileError{Message: "PDF compilation timed out", Log: "log", IsTimeout: true}}, nil, 5*1024*1024)
 	body, ct := letterForm(t, nil)
 	w := postLetter(r, body, ct)
 
@@ -215,7 +215,7 @@ func TestCreateLetterCompileTimeout(t *testing.T) {
 }
 
 func TestCreateLetterBodyTooLarge(t *testing.T) {
-	r := newTestEngine(t, stubCompiler{result: &pipeline.CompileResult{PDF: []byte("%PDF-")}}, nil, 64)
+	r := newTestEngine(t, stubCompiler{pdf: []byte("%PDF-")}, nil, 64)
 	body, ct := letterForm(t, nil)
 	w := postLetter(r, body, ct)
 

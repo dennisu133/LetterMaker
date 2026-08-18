@@ -11,18 +11,6 @@ import (
 )
 
 // -----------------------------------------------------------------------------
-// Compile Result
-// -----------------------------------------------------------------------------
-
-// CompileResult holds the result of a LaTeX compilation
-type CompileResult struct {
-	// PDF contains the generated PDF bytes
-	PDF []byte
-	// Log contains the pdflatex output (for debugging)
-	Log string
-}
-
-// -----------------------------------------------------------------------------
 // Compiler Error
 // -----------------------------------------------------------------------------
 
@@ -33,26 +21,7 @@ type CompileError struct {
 	IsTimeout bool
 }
 
-func (e CompileError) Error() string {
-	return e.Message
-}
-
-// NewCompileError creates a new compile error
-func NewCompileError(message string, log string) CompileError {
-	return CompileError{
-		Message: message,
-		Log:     log,
-	}
-}
-
-// NewCompileTimeoutError creates a timeout error
-func NewCompileTimeoutError(log string) CompileError {
-	return CompileError{
-		Message:   "PDF compilation timed out",
-		Log:       log,
-		IsTimeout: true,
-	}
-}
+func (e CompileError) Error() string { return e.Message }
 
 // -----------------------------------------------------------------------------
 // Compiler
@@ -76,9 +45,9 @@ func NewCompiler(timeout time.Duration) *Compiler {
 // is also killed when the caller cancels (e.g. the client disconnects).
 // The job's temporary directory should be cleaned up by the caller after
 // the PDF has been sent to the client.
-func (c *Compiler) Compile(ctx context.Context, job *PreparedJob) (*CompileResult, error) {
-	if job == nil || job.TexFile == "" {
-		return nil, NewCompileError("invalid job: missing tex file", "")
+func (c *Compiler) Compile(ctx context.Context, job *PreparedJob) ([]byte, error) {
+	if job == nil || job.Dir == "" {
+		return nil, CompileError{Message: "invalid job: missing directory"}
 	}
 
 	// Layer the compile timeout on top of the caller's context
@@ -89,9 +58,8 @@ func (c *Compiler) Compile(ctx context.Context, job *PreparedJob) (*CompileResul
 	// Use absolute path for output directory to avoid pdflatex issues
 	dir, err := filepath.Abs(job.Dir)
 	if err != nil {
-		return nil, NewCompileError(fmt.Sprintf("failed to resolve directory path: %v", err), "")
+		return nil, CompileError{Message: fmt.Sprintf("failed to resolve directory path: %v", err)}
 	}
-	texFilename := filepath.Base(job.TexFile)
 
 	// Build pdflatex command
 	// -interaction=nonstopmode: don't stop on errors, try to complete
@@ -104,7 +72,7 @@ func (c *Compiler) Compile(ctx context.Context, job *PreparedJob) (*CompileResul
 		"-halt-on-error",
 		"-no-shell-escape",
 		"-output-directory", dir,
-		texFilename,
+		letterTexFilename,
 	)
 	cmd.Dir = dir
 
@@ -124,37 +92,29 @@ func (c *Compiler) Compile(ctx context.Context, job *PreparedJob) (*CompileResul
 
 	// Check for timeout
 	if ctx.Err() == context.DeadlineExceeded {
-		return nil, NewCompileTimeoutError(logOutput)
+		return nil, CompileError{
+			Message:   "PDF compilation timed out",
+			Log:       logOutput,
+			IsTimeout: true,
+		}
 	}
 
 	// Check for other errors
 	if err != nil {
-		return nil, NewCompileError(
-			fmt.Sprintf("pdflatex failed: %v", err),
-			logOutput,
-		)
+		return nil, CompileError{Message: fmt.Sprintf("pdflatex failed: %v", err), Log: logOutput}
 	}
 
 	// Read the generated PDF
-	pdfPath := filepath.Join(dir, "letter.pdf")
+	pdfPath := filepath.Join(dir, letterPDFFilename)
 	pdfBytes, err := os.ReadFile(pdfPath)
 	if err != nil {
-		return nil, NewCompileError(
-			fmt.Sprintf("failed to read generated PDF: %v", err),
-			logOutput,
-		)
+		return nil, CompileError{Message: fmt.Sprintf("failed to read generated PDF: %v", err), Log: logOutput}
 	}
 
 	// Verify we got a valid PDF (check magic header)
 	if len(pdfBytes) < 5 || string(pdfBytes[:5]) != "%PDF-" {
-		return nil, NewCompileError(
-			"generated file is not a valid PDF",
-			logOutput,
-		)
+		return nil, CompileError{Message: "generated file is not a valid PDF", Log: logOutput}
 	}
 
-	return &CompileResult{
-		PDF: pdfBytes,
-		Log: logOutput,
-	}, nil
+	return pdfBytes, nil
 }

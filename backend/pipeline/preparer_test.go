@@ -77,11 +77,7 @@ func TestPrepareManualMode(t *testing.T) {
 	}
 	defer func() { _ = job.Cleanup() }()
 
-	if job.StampFile != "" {
-		t.Errorf("manual mode should not have a stamp file, got %q", job.StampFile)
-	}
-
-	texBytes, err := os.ReadFile(job.TexFile)
+	texBytes, err := os.ReadFile(filepath.Join(job.Dir, letterTexFilename))
 	if err != nil {
 		t.Fatalf("failed to read tex file: %v", err)
 	}
@@ -123,10 +119,7 @@ func TestPrepareStampMode(t *testing.T) {
 	}
 	defer func() { _ = job.Cleanup() }()
 
-	if job.StampFile == "" {
-		t.Fatal("stamp mode must write a stamp file")
-	}
-	stampBytes, err := os.ReadFile(job.StampFile)
+	stampBytes, err := os.ReadFile(filepath.Join(job.Dir, stampPDFFilename))
 	if err != nil {
 		t.Fatalf("failed to read stamp file: %v", err)
 	}
@@ -134,7 +127,7 @@ func TestPrepareStampMode(t *testing.T) {
 		t.Error("stamp file content mismatch")
 	}
 
-	texBytes, err := os.ReadFile(job.TexFile)
+	texBytes, err := os.ReadFile(filepath.Join(job.Dir, letterTexFilename))
 	if err != nil {
 		t.Fatalf("failed to read tex file: %v", err)
 	}

@@ -60,14 +60,16 @@ func getBabelLanguage(locale string) string {
 // Prepared Result
 // -----------------------------------------------------------------------------
 
+const (
+	letterTexFilename = "letter.tex"
+	letterPDFFilename = "letter.pdf"
+	stampPDFFilename  = "stamp.pdf"
+)
+
 // PreparedJob represents a prepared LaTeX compilation job
 type PreparedJob struct {
 	// Dir is the temporary directory containing all files
 	Dir string
-	// TexFile is the path to the main .tex file
-	TexFile string
-	// StampFile is the path to the stamp PDF (empty if no stamp)
-	StampFile string
 }
 
 // Cleanup removes the temporary directory and all its contents
@@ -109,30 +111,27 @@ func (p *Preparer) Prepare(req *LetterRequest, contentLatex string) (*PreparedJo
 		return nil, fmt.Errorf("failed to create temp directory: %v", err)
 	}
 
-	job := &PreparedJob{
-		Dir: dirPath,
-	}
+	job := &PreparedJob{Dir: dirPath}
 
 	// Write stamp file if present
-	if len(req.StampPDF) > 0 {
-		stampPath := filepath.Join(dirPath, "stamp.pdf")
+	hasStamp := len(req.StampPDF) > 0
+	if hasStamp {
+		stampPath := filepath.Join(dirPath, stampPDFFilename)
 		if err := os.WriteFile(stampPath, req.StampPDF, 0644); err != nil {
 			_ = job.Cleanup()
 			return nil, fmt.Errorf("failed to write stamp file: %v", err)
 		}
-		job.StampFile = stampPath
 	}
 
 	// Generate LaTeX content
-	latexContent := p.generateLatex(req, contentLatex, job.StampFile != "")
+	latexContent := p.generateLatex(req, contentLatex, hasStamp)
 
 	// Write LaTeX file
-	texPath := filepath.Join(dirPath, "letter.tex")
+	texPath := filepath.Join(dirPath, letterTexFilename)
 	if err := os.WriteFile(texPath, []byte(latexContent), 0644); err != nil {
 		_ = job.Cleanup()
 		return nil, fmt.Errorf("failed to write tex file: %v", err)
 	}
-	job.TexFile = texPath
 
 	return job, nil
 }
@@ -178,7 +177,9 @@ func (p *Preparer) generateLatex(req *LetterRequest, contentLatex string, hasSta
 % Add stamp as background on first page only
 \AddToShipoutPictureBG*{%
     \AtPageUpperLeft{%
-        \raisebox{-\height}{\includegraphics[width=\paperwidth,height=\paperheight]{stamp.pdf}}%
+        \raisebox{-\height}{\includegraphics[width=\paperwidth,height=\paperheight]{`)
+		sb.WriteString(stampPDFFilename)
+		sb.WriteString(`}}%
     }%
 }
 `)

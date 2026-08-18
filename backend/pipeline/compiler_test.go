@@ -41,14 +41,14 @@ func TestCompileProducesPDF(t *testing.T) {
 	requirePdflatex(t)
 
 	c := NewCompiler(60 * time.Second)
-	result, err := c.Compile(context.Background(), prepareTestJob(t))
+	pdf, err := c.Compile(context.Background(), prepareTestJob(t))
 	if err != nil {
 		if compileErr, ok := err.(CompileError); ok && compileErr.Log != "" {
 			t.Fatalf("compile failed: %v\npdflatex log:\n%s", err, compileErr.Log)
 		}
 		t.Fatalf("compile failed: %v", err)
 	}
-	if !bytes.HasPrefix(result.PDF, []byte("%PDF-")) {
+	if !bytes.HasPrefix(pdf, []byte("%PDF-")) {
 		t.Error("output does not look like a PDF")
 	}
 }
@@ -87,13 +87,13 @@ func TestCompileInvalidLatex(t *testing.T) {
 	requirePdflatex(t)
 
 	dir := t.TempDir()
-	texPath := filepath.Join(dir, "letter.tex")
+	texPath := filepath.Join(dir, letterTexFilename)
 	if err := os.WriteFile(texPath, []byte(`\documentclass{article}\begin{document}\undefinedmacro\end{document}`), 0644); err != nil {
 		t.Fatalf("failed to write tex file: %v", err)
 	}
 
 	c := NewCompiler(60 * time.Second)
-	_, err := c.Compile(context.Background(), &PreparedJob{Dir: dir, TexFile: texPath})
+	_, err := c.Compile(context.Background(), &PreparedJob{Dir: dir})
 	if err == nil {
 		t.Fatal("expected error for invalid LaTeX, got nil")
 	}

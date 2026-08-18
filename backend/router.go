@@ -27,7 +27,7 @@ func maxBodySize(limit int64) gin.HandlerFunc {
 // letterCompiler compiles a prepared job into a PDF.
 // Satisfied by *pipeline.Compiler; an interface so tests can stub compilation.
 type letterCompiler interface {
-	Compile(ctx context.Context, job *pipeline.PreparedJob) (*pipeline.CompileResult, error)
+	Compile(ctx context.Context, job *pipeline.PreparedJob) ([]byte, error)
 }
 
 // NewRouter builds the Gin engine with all middleware, pipeline components
@@ -173,7 +173,7 @@ func handleCreateLetter(validator *pipeline.Validator, preparer *pipeline.Prepar
 
 		// Step 7: Compile PDF. Passing the request context frees the
 		// compile slot early when the client disconnects mid-compile.
-		result, err := compiler.Compile(c.Request.Context(), job)
+		pdf, err := compiler.Compile(c.Request.Context(), job)
 		if err != nil {
 			if c.Request.Context().Err() != nil {
 				log.Printf("[WARN] Client disconnected during compilation")
@@ -202,6 +202,6 @@ func handleCreateLetter(validator *pipeline.Validator, preparer *pipeline.Prepar
 		// Step 8: Respond with PDF
 		c.Header("Content-Type", "application/pdf")
 		c.Header("Content-Disposition", "attachment; filename=letter.pdf")
-		c.Data(http.StatusOK, "application/pdf", result.PDF)
+		c.Data(http.StatusOK, "application/pdf", pdf)
 	}
 }
