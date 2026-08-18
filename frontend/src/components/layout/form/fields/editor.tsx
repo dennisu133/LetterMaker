@@ -1,12 +1,3 @@
-import {
-	toolbarChevronClass,
-	toolbarClass,
-	toolbarDropdownButtonClass,
-	toolbarIconClass,
-	toolbarSeparatorClass,
-	toolbarSquareButtonClass,
-	toolbarToggleClass
-} from "@/components/layout/form/fields/editor-skeleton";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -19,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { MAX_CONTENT } from "@/lib/constants";
+import { quietControl } from "@/lib/paper";
 import { createEmptyDoc, parseProseMirrorJson } from "@/lib/prosemirror";
 import { cn } from "@/lib/utils";
 
@@ -46,6 +38,24 @@ import {
 import * as React from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+
+const toolbarClass =
+	"border-paper-line flex flex-wrap items-center gap-1 border-b py-1 opacity-80 transition-opacity group-focus-within/editor:opacity-100";
+const toolbarDropdownButtonClass = cn(
+	"h-[clamp(1.5rem,1.25rem+0.75vw,1.75rem)] gap-1 px-[clamp(0.25rem,0.125rem+0.375vw,0.5rem)]",
+	quietControl
+);
+const toolbarIconClass = "size-[clamp(0.875rem,0.75rem+0.375vw,1rem)]";
+const toolbarChevronClass = "size-[clamp(0.625rem,0.5rem+0.375vw,0.75rem)]";
+const toolbarSeparatorClass = cn(
+	"mx-[clamp(0,0.0625vw,0.125rem)] my-auto h-[clamp(1.25rem,1rem+0.75vw,1.5rem)]",
+	"bg-paper-line"
+);
+const toolbarSquareButtonClass = cn(
+	"size-[clamp(1.5rem,1.25rem+0.75vw,1.75rem)] p-0",
+	quietControl
+);
+const toolbarToggleClass = quietControl;
 
 interface EditorToolbarProps {
 	editor: Editor;

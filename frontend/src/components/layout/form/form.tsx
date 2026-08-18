@@ -6,7 +6,6 @@ import { useFormActionsRegister, useStamp } from "@/components/form-actions-prov
 import { AddressSection } from "@/components/layout/form/fields/address";
 import { ClosingSection } from "@/components/layout/form/fields/closing";
 import { DetailsSection } from "@/components/layout/form/fields/content";
-import { ContentSectionSkeleton } from "@/components/layout/form/fields/editor-skeleton";
 import { StampCorner } from "@/components/layout/form/stamp-corner";
 import { SubmissionProvider, useSubmission } from "@/components/submission-provider";
 import { openPdfInNewTab, submitLetter } from "@/lib/api";
@@ -42,6 +41,8 @@ function useWarmFormResolver() {
 	}, []);
 }
 
+// Keep the tiptap editor out of the critical chunk; a flex spacer holds the
+// layout until it arrives.
 const ContentSection = React.lazy(async () => {
 	const module = await import("@/components/layout/form/fields/editor");
 	return { default: module.ContentSection };
@@ -179,7 +180,7 @@ function LetterFormContent() {
 
 					<DetailsSection />
 
-					<React.Suspense fallback={<ContentSectionSkeleton />}>
+					<React.Suspense fallback={<div className="flex-1" aria-hidden="true" />}>
 						<ContentSection />
 					</React.Suspense>
 					<ClosingSection />
