@@ -14,7 +14,6 @@
 		"stamp": "Briefmarke hochladen",
 		"example": "Beispiel",
 		"submit": "Absenden",
-		"submitCooldown": "Warte {{seconds}}s",
 		"reset": "Zurücksetzen"
 	},
 	"stamp": {

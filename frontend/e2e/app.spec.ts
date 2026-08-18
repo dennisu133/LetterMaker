@@ -68,7 +68,7 @@ test("updates all editor affordances when switching language", async ({ page }) 
 	await expect(page.locator("html")).toHaveAttribute("lang", "de");
 });
 
-test("submits the example letter and starts the cooldown", async ({ page }) => {
+test("submits the example letter", async ({ page }) => {
 	await page.route("**/api/create", async (route) => {
 		await route.fulfill({
 			status: 200,
@@ -91,7 +91,7 @@ test("submits the example letter and starts the cooldown", async ({ page }) => {
 	expect(request.method()).toBe("POST");
 	expect(request.postData()).toContain('name="recipientName"');
 	expect(request.postData()).toContain("Receiver Inc.");
-	await expect(page.getByRole("button", { name: /Wait [1-5]s/ })).toBeDisabled();
+	await expect(page.getByRole("button", { name: "Submit" })).toBeEnabled();
 });
 
 test("validates the bundled stamp examples in the real PDF.js worker", async ({ page }) => {

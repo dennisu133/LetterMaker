@@ -51,7 +51,7 @@ function LetterFormContent() {
 	const { t } = useTranslation();
 	const { register: registerActions } = useFormActionsRegister();
 	const { stamp } = useStamp();
-	const { setSubmitting, setError, recordSubmission } = useSubmission();
+	const { setSubmitting, setError } = useSubmission();
 
 	const form = useForm<FormValues>({
 		resolver: lazyFormResolver,
@@ -139,7 +139,6 @@ function LetterFormContent() {
 
 				if (result.success) {
 					openPdfInNewTab(result.pdf);
-					recordSubmission();
 				} else {
 					setError(result.error);
 				}
@@ -147,7 +146,7 @@ function LetterFormContent() {
 				setSubmitting(false);
 			}
 		},
-		[setSubmitting, setError, recordSubmission, t]
+		[setSubmitting, setError, t]
 	);
 
 	const handleFormSubmit = React.useCallback(

@@ -90,7 +90,7 @@ describe("LetterMaker", () => {
 		expect(screen.getByRole("textbox", { name: "Letter content" })).toHaveTextContent("");
 	});
 
-	it("submits a complete letter, opens the PDF, and starts the cooldown", async () => {
+	it("submits a complete letter and opens the PDF", async () => {
 		const user = userEvent.setup();
 		const pdf = new Blob(["pdf"], { type: "application/pdf" });
 		vi.mocked(submitLetter).mockResolvedValue({
@@ -113,7 +113,7 @@ describe("LetterMaker", () => {
 			})
 		);
 		expect(openPdfInNewTab).toHaveBeenCalledWith(pdf);
-		expect(await screen.findByRole("button", { name: "Wait 5s" })).toBeDisabled();
+		expect(screen.getByRole("button", { name: "Submit" })).toBeEnabled();
 	});
 
 	it("shows a clear error when an uploaded stamp is invalid", async () => {

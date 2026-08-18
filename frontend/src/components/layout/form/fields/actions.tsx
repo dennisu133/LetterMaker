@@ -21,14 +21,14 @@ import { cn } from "@/lib/utils";
 export function FormActions() {
 	const { reset } = useFormContext();
 	const { clearStamp } = useStamp();
-	const { state: submissionState, clearError, canSubmit, cooldownSeconds } = useSubmission();
+	const { isSubmitting, error, setError } = useSubmission();
 	const { t } = useTranslation();
 
-	const hasError = submissionState.error !== null;
+	const hasError = error !== null;
 
 	const handlePopoverOpenChange = (open: boolean) => {
 		if (!open && hasError) {
-			clearError();
+			setError(null);
 		}
 	};
 
@@ -37,30 +37,24 @@ export function FormActions() {
 			<Popover open={hasError} onOpenChange={handlePopoverOpenChange}>
 				<PopoverTrigger
 					render={
-						<Button
-							className="min-w-32"
-							type="submit"
-							disabled={submissionState.isSubmitting || !canSubmit}
-						>
-							{submissionState.isSubmitting ? (
+						<Button className="min-w-32" type="submit" disabled={isSubmitting}>
+							{isSubmitting ? (
 								<Spinner className="mr-1" />
 							) : (
-								canSubmit && <Send className="size-4" aria-hidden="true" />
+								<Send className="size-4" aria-hidden="true" />
 							)}
-							{!canSubmit && !submissionState.isSubmitting
-								? t("button.submitCooldown", { seconds: cooldownSeconds })
-								: t("button.submit")}
+							{t("button.submit")}
 						</Button>
 					}
 				/>
-				{submissionState.error && (
+				{error && (
 					<PopoverContent align="end" side="top" className={cn(inkSurface, "w-80")}>
 						<PopoverHeader>
 							<PopoverTitle className="text-destructive flex items-center gap-2">
 								<AlertCircle className="size-4" />
 								{t("form.error.title")}
 							</PopoverTitle>
-							<PopoverDescription>{t(`form.error.${submissionState.error}`)}</PopoverDescription>
+							<PopoverDescription>{t(`form.error.${error}`)}</PopoverDescription>
 						</PopoverHeader>
 					</PopoverContent>
 				)}
@@ -69,11 +63,11 @@ export function FormActions() {
 				variant="ghost"
 				type="button"
 				className={quietControl}
-				disabled={submissionState.isSubmitting}
+				disabled={isSubmitting}
 				onClick={() => {
 					reset();
 					clearStamp();
-					clearError();
+					setError(null);
 				}}
 			>
 				{t("button.reset")}
