@@ -37,7 +37,7 @@ export function FormActions() {
 			<Popover open={hasError} onOpenChange={handlePopoverOpenChange}>
 				<PopoverTrigger
 					render={
-						<Button className="min-w-32" type="submit" disabled={isSubmitting}>
+						<Button className="relative z-10 min-w-32" type="submit" disabled={isSubmitting}>
 							{isSubmitting ? (
 								<Spinner className="mr-1" />
 							) : (
