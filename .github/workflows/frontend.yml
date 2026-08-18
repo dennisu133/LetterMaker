@@ -60,12 +60,3 @@ jobs:
 
       - name: Run browser tests
         run: bun run test:e2e
-
-      - name: Upload browser report
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: playwright-report
-          path: frontend/playwright-report/
-          if-no-files-found: ignore
-          retention-days: 7

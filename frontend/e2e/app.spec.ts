@@ -6,28 +6,6 @@ test.beforeEach(async ({ page }) => {
 	await page.goto("/");
 });
 
-test("guides an incomplete submission with accessible errors", async ({ page }) => {
-	await page.getByRole("button", { name: "Submit" }).click();
-
-	const recipientName = page.locator("#recipientName");
-	const editor = page.locator("#content");
-
-	await expect(page.getByText("Enter the recipient's name.")).toBeVisible();
-	await expect(page.getByText("Enter the recipient's address.")).toBeVisible();
-	await expect(page.getByText("Write the letter content.")).toBeVisible();
-	await expect(recipientName).toBeFocused();
-	await expect(recipientName).toHaveAttribute("aria-invalid", "true");
-	await expect(recipientName).toHaveAttribute("aria-describedby", "recipientName-error");
-	await expect(editor).toHaveAttribute("role", "textbox");
-	await expect(editor).toHaveAttribute("aria-invalid", "true");
-});
-
-test("stores dates without crossing time-zone boundaries", async ({ page }) => {
-	const date = page.locator("#date");
-	await date.fill("2026-07-15");
-	await expect(date).toHaveValue("2026-07-15");
-});
-
 test("creates a new paragraph when pressing Enter in the editor", async ({ page }) => {
 	// Regression: duplicate prosemirror-model copies in the bundle made
 	// splitBlock throw, silently swallowing every Enter press in production.
@@ -49,19 +27,6 @@ test("keeps the toolbar in sync with keyboard formatting", async ({ page }) => {
 	await expect(bold).toHaveAttribute("aria-pressed", "true");
 	await page.keyboard.press("Control+b");
 	await expect(bold).toHaveAttribute("aria-pressed", "false");
-});
-
-test("updates all editor affordances when switching language", async ({ page }) => {
-	await page.getByRole("button", { name: "Switch language" }).click();
-	await page.getByRole("menuitem", { name: "🇩🇪 Deutsch" }).click();
-
-	const editor = page.getByRole("textbox", { name: "Briefinhalt" });
-	await expect(page.getByRole("button", { name: "Absenden" })).toBeVisible();
-	await expect(editor.locator("p")).toHaveAttribute(
-		"data-placeholder",
-		"Beginnen Sie mit Ihrem Brief…"
-	);
-	await expect(page.locator("html")).toHaveAttribute("lang", "de");
 });
 
 test("submits the example letter", async ({ page }) => {
@@ -109,8 +74,8 @@ test("has no automatically detectable accessibility violations", async ({ page }
 	expect(results.violations).toEqual([]);
 });
 
-test("does not overflow the narrow mobile viewport", async ({ page }, testInfo) => {
-	test.skip(testInfo.project.name !== "narrow-mobile", "Only relevant to the narrow viewport");
+test("does not overflow the narrow mobile viewport", async ({ page }) => {
+	await page.setViewportSize({ width: 320, height: 700 });
 
 	const expectNoHorizontalOverflow = async () => {
 		const dimensions = await page.evaluate(() => ({

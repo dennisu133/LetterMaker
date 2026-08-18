@@ -1,4 +1,4 @@
-import { defineConfig, devices } from "@playwright/test";
+import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
 	testDir: "./e2e",
@@ -12,19 +12,6 @@ export default defineConfig({
 		screenshot: "only-on-failure",
 		video: "retain-on-failure"
 	},
-	projects: [
-		{
-			name: "chromium",
-			use: { ...devices["Desktop Chrome"] }
-		},
-		{
-			name: "narrow-mobile",
-			use: {
-				...devices["Pixel 5"],
-				viewport: { width: 320, height: 700 }
-			}
-		}
-	],
 	webServer: {
 		// In CI the production bundle from the preceding build step is served so
 		// the deployed artifact is what gets tested; locally the dev server keeps

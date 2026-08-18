@@ -34,6 +34,7 @@ describe("LetterMaker", () => {
 		expect(screen.getByText("Enter a subject.")).toBeVisible();
 		expect(screen.getByText("Write the letter content.")).toBeVisible();
 		expect(screen.getByText("Enter a signature.")).toBeVisible();
+		expect(recipientName).toHaveFocus();
 		expect(recipientName).toHaveAttribute("aria-invalid", "true");
 		expect(recipientName).toHaveAccessibleDescription("Enter the recipient's name.");
 		expect(editor).toHaveAttribute("aria-invalid", "true");
