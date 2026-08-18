@@ -5,11 +5,6 @@ import { supportedLanguages } from "@/i18n";
 
 export type FormalitiesLanguage = string;
 
-type FormalitiesProviderProps = {
-	children: React.ReactNode;
-	storageKey?: string;
-};
-
 type FormalitiesProviderState = {
 	language: FormalitiesLanguage;
 	setLanguage: (language: FormalitiesLanguage) => void;
@@ -23,23 +18,17 @@ const getLanguageFromI18n = (): FormalitiesLanguage => {
 	return supportedLanguages.includes(i18nLang) ? i18nLang : "en";
 };
 
-export function FormalitiesProvider({
-	children,
-	storageKey = "formalities-language"
-}: FormalitiesProviderProps) {
+export function FormalitiesProvider({ children }: { children: React.ReactNode }) {
 	const [language, setLanguageState] = useState<FormalitiesLanguage>(() => {
 		// Prioritise localStorage if user manually changed it, otherwise use i18next's detected language
-		const stored = localStorage.getItem(storageKey);
+		const stored = localStorage.getItem("formalities-language");
 		return stored && supportedLanguages.includes(stored) ? stored : getLanguageFromI18n();
 	});
 
-	const setLanguage = useCallback(
-		(language: FormalitiesLanguage) => {
-			localStorage.setItem(storageKey, language);
-			setLanguageState(language);
-		},
-		[storageKey]
-	);
+	const setLanguage = useCallback((language: FormalitiesLanguage) => {
+		localStorage.setItem("formalities-language", language);
+		setLanguageState(language);
+	}, []);
 
 	const value = useMemo(() => ({ language, setLanguage }), [language, setLanguage]);
 

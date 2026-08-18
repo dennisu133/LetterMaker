@@ -10,11 +10,6 @@ import {
 
 type Theme = "dark" | "light";
 
-type ThemeProviderProps = {
-	children: React.ReactNode;
-	storageKey?: string;
-};
-
 type ThemeProviderState = {
 	/** The theme currently applied (the user override, or the system theme). */
 	theme: Theme;
@@ -30,11 +25,11 @@ const ThemeProviderContext = createContext<ThemeProviderState | null>(null);
 const getSystemTheme = (): Theme =>
 	window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 
-export function ThemeProvider({ children, storageKey = "theme" }: ThemeProviderProps) {
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
 	// The stored value is only ever a manual override; absence means "follow
 	// the system". Legacy values like "system" fail validation and are ignored.
 	const [override, setOverride] = useState<Theme | null>(() => {
-		const storedTheme = localStorage.getItem(storageKey);
+		const storedTheme = localStorage.getItem("theme");
 		return themes.includes(storedTheme as Theme) ? (storedTheme as Theme) : null;
 	});
 	const [systemTheme, setSystemTheme] = useState<Theme>(getSystemTheme);
@@ -62,14 +57,14 @@ export function ThemeProvider({ children, storageKey = "theme" }: ThemeProviderP
 
 		if (next === getSystemTheme()) {
 			// Back in sync with the OS: drop the override and keep following it
-			localStorage.removeItem(storageKey);
+			localStorage.removeItem("theme");
 			setOverride(null);
 			setSystemTheme(next);
 		} else {
-			localStorage.setItem(storageKey, next);
+			localStorage.setItem("theme", next);
 			setOverride(next);
 		}
-	}, [theme, storageKey]);
+	}, [theme]);
 
 	const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
 
