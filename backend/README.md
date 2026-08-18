@@ -90,3 +90,36 @@ Explanation:
 - GOARCH=amd64: Sets the target Architecture to 64-bit (x86_64).
 - "-w" (Omit DWARF): Removes debugging functionality to make binary smaller
 - "-s" (Omit Symbol Table): Disables the symbol table. It removes the information needed to map binary addresses back to function names or line numbers. If the program crashes, the stack trace will be less helpful, but the binary will be even smaller
+
+## Deployment with systemd
+
+The backend loads `.env` from its working directory. The example below expects the binary and `.env` in `/opt/lettermaker`, with `/opt/lettermaker/tmp` writable by a dedicated `lettermaker` system user.
+
+Save this as `/etc/systemd/system/lettermaker-backend.service`:
+
+```ini
+[Unit]
+Description=LetterMaker backend
+After=network.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+User=lettermaker
+Group=lettermaker
+WorkingDirectory=/opt/lettermaker
+ExecStart=/opt/lettermaker/lettermaker-backend
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Load and start the service:
+
+```sh
+sudo systemctl daemon-reload
+sudo systemctl enable --now lettermaker-backend
+sudo journalctl -u lettermaker-backend -f
+```
