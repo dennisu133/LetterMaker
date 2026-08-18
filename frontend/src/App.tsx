@@ -2,7 +2,7 @@ import { DropZone } from "@/components/drop-zone";
 import { FormActionsProvider } from "@/components/form-actions-provider";
 import { FormalitiesProvider } from "@/components/formalities-provider";
 import { Footer } from "@/components/layout/footer.tsx";
-import { Main } from "@/components/layout/main.tsx";
+import { LetterForm } from "@/components/layout/form/form";
 import { Navbar } from "@/components/layout/navbar";
 import { MetaTags } from "@/components/metadata";
 import { ThemeProvider } from "@/components/theme-provider.tsx";
@@ -16,7 +16,9 @@ export default function App() {
 					<TooltipProvider>
 						<MetaTags />
 						<Navbar />
-						<Main />
+						<main className="desk flex w-full flex-1 flex-col">
+							<LetterForm />
+						</main>
 						<Footer />
 						<DropZone />
 					</TooltipProvider>
