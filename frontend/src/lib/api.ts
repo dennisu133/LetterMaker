@@ -35,8 +35,7 @@ export type ErrorCode =
 /**
  * Result type for API calls
  */
-export type SubmitResult =
-	{ success: true; pdf: Blob; filename: string } | { success: false; error: ErrorCode };
+export type SubmitResult = { success: true; pdf: Blob } | { success: false; error: ErrorCode };
 
 /**
  * Builds a FormData object from the form values.
@@ -78,24 +77,6 @@ function buildFormData(data: SubmitLetterPayload): FormData {
 	}
 
 	return formData;
-}
-
-/**
- * Extracts filename from Content-Disposition header or returns default
- */
-function extractFilename(response: Response): string {
-	const contentDisposition = response.headers.get("Content-Disposition");
-	if (contentDisposition) {
-		// Try to extract filename from header
-		// Format: attachment; filename="letter.pdf" or attachment; filename*=UTF-8''letter.pdf
-		const filenameMatch = contentDisposition.match(/filename\*?=['"]?(?:UTF-8'')?([^;\n"']+)/i);
-		if (filenameMatch?.[1]) {
-			return decodeURIComponent(filenameMatch[1]);
-		}
-	}
-	// Default filename with timestamp
-	const timestamp = new Date().toISOString().slice(0, 10);
-	return `letter-${timestamp}.pdf`;
 }
 
 /**
@@ -150,8 +131,7 @@ export async function submitLetter(payload: SubmitLetterPayload): Promise<Submit
 		if (response.ok && contentType.includes("application/pdf")) {
 			// Success - return the PDF blob
 			const pdf = await response.blob();
-			const filename = extractFilename(response);
-			return { success: true, pdf, filename };
+			return { success: true, pdf };
 		}
 
 		// Error response - derive code from HTTP status

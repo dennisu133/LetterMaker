@@ -95,8 +95,7 @@ describe("LetterMaker", () => {
 		const pdf = new Blob(["pdf"], { type: "application/pdf" });
 		vi.mocked(submitLetter).mockResolvedValue({
 			success: true,
-			pdf,
-			filename: "letter.pdf"
+			pdf
 		});
 		render(<App />);
 

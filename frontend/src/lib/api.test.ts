@@ -29,21 +29,18 @@ describe("letter API", () => {
 		vi.useRealTimers();
 	});
 
-	it("posts manual letters as multipart data and returns the PDF metadata", async () => {
+	it("posts manual letters as multipart data and returns the PDF", async () => {
 		const fetchMock = vi.fn().mockResolvedValue(
 			new Response("%PDF-1.4", {
 				status: 200,
-				headers: {
-					"Content-Type": "application/pdf",
-					"Content-Disposition": "attachment; filename*=UTF-8''application-letter.pdf"
-				}
+				headers: { "Content-Type": "application/pdf" }
 			})
 		);
 		vi.stubGlobal("fetch", fetchMock);
 
 		const result = await submitLetter(manualPayload);
 
-		expect(result).toMatchObject({ success: true, filename: "application-letter.pdf" });
+		expect(result).toMatchObject({ success: true });
 		if (!result.success) {
 			throw new Error("Expected a successful PDF response");
 		}
