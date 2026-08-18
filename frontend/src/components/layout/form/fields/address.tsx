@@ -41,7 +41,7 @@ export function AddressSection({ kind, className }: AddressSectionProps) {
 				className
 			)}
 		>
-			<legend className="text-paper-muted float-left mb-2 w-full p-0 text-sm font-medium tracking-[0.08em] uppercase">
+			<legend className="text-paper-muted float-left mb-2 w-full p-0 text-xl font-medium tracking-[0.08em] uppercase">
 				{t(`contact.${kind}`)}
 			</legend>
 			<div className={cn("flex w-full flex-col gap-2", isRecipient && "gap-3")}>

@@ -37,13 +37,13 @@ function PopoverHeader({ className, ...props }: ComponentProps<"div">) {
 }
 
 function PopoverTitle({ className, ...props }: PopoverPrimitive.Title.Props) {
-	return <PopoverPrimitive.Title className={cn("text-sm font-medium", className)} {...props} />;
+	return <PopoverPrimitive.Title className={cn("text-xl font-medium", className)} {...props} />;
 }
 
 function PopoverDescription({ className, ...props }: PopoverPrimitive.Description.Props) {
 	return (
 		<PopoverPrimitive.Description
-			className={cn("text-muted-foreground text-xs/relaxed", className)}
+			className={cn("text-muted-foreground text-base/relaxed", className)}
 			{...props}
 		/>
 	);

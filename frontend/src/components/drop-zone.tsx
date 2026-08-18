@@ -95,7 +95,7 @@ export function DropZone() {
 				<Upload className="text-primary size-12" strokeWidth={2.5} />
 				<div className="text-center">
 					<p className="text-lg font-bold">{t("stamp.drop.title")}</p>
-					<p className="text-muted-foreground text-sm">{t("stamp.drop.description")}</p>
+					<p className="text-muted-foreground text-xl">{t("stamp.drop.description")}</p>
 				</div>
 			</div>
 		</div>

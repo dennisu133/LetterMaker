@@ -54,9 +54,7 @@ export function StampCorner() {
 					<CheckCircle className="size-4 shrink-0" aria-hidden="true" />
 					{t("stamp.success.title")}
 				</p>
-				<p className="text-paper-muted mt-1 text-xs leading-snug">
-					{t("stamp.success.description")}
-				</p>
+				<p className="text-paper-muted mt-1 leading-snug">{t("stamp.success.description")}</p>
 				<Button
 					variant="ghost"
 					size="sm"

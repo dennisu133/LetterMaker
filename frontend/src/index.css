@@ -40,12 +40,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/*TODO: remove me*/
-@theme {
-	--text-xs: 1rem;
-	--text-sm: clamp(1.125rem, 1.08rem + 0.19vw, 1.25rem);
-}
-
 :root {
 	color-scheme: light;
 

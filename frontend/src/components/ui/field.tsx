@@ -8,7 +8,7 @@ function FieldError({ className, children, ...props }: React.ComponentProps<"div
 	if (!children) return null;
 
 	return (
-		<div role="alert" className={cn("text-destructive text-xs", className)} {...props}>
+		<div role="alert" className={cn("text-destructive", className)} {...props}>
 			{children}
 		</div>
 	);
