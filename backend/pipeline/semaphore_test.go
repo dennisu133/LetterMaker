@@ -3,7 +3,7 @@ package pipeline
 import "testing"
 
 func TestSemaphoreLimitsConcurrency(t *testing.T) {
-	s := NewSemaphore(SemaphoreConfig{MaxConcurrent: 2})
+	s := NewSemaphore(2)
 
 	release1, ok := s.TryAcquire()
 	if !ok {
@@ -24,7 +24,7 @@ func TestSemaphoreLimitsConcurrency(t *testing.T) {
 }
 
 func TestSemaphoreDefaultCapacity(t *testing.T) {
-	s := NewSemaphore(SemaphoreConfig{MaxConcurrent: 0})
+	s := NewSemaphore(0)
 
 	for i := range 2 {
 		if _, ok := s.TryAcquire(); !ok {

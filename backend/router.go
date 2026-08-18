@@ -53,7 +53,7 @@ func NewRouter(config Config) (*gin.Engine, error) {
 	// Set CORS_ORIGINS="none" to disable (when nginx handles CORS)
 	// Set CORS_ORIGINS="*" to allow all origins (not recommended for production)
 	// Set CORS_ORIGINS="http://localhost:5173,https://yourdomain.com" for specific origins
-	if len(config.CORS.AllowedOrigins) > 0 {
+	if len(config.AllowedOrigins) > 0 {
 		corsConfig := cors.Config{
 			AllowMethods:  []string{"GET", "POST", "OPTIONS"},
 			AllowHeaders:  []string{"Origin", "Content-Type", "Accept"},
@@ -65,12 +65,12 @@ func NewRouter(config Config) (*gin.Engine, error) {
 		}
 
 		// Check for wildcard
-		if len(config.CORS.AllowedOrigins) == 1 && config.CORS.AllowedOrigins[0] == "*" {
+		if len(config.AllowedOrigins) == 1 && config.AllowedOrigins[0] == "*" {
 			corsConfig.AllowAllOrigins = true
 			log.Println("[WARN] CORS: Allowing all origins - not recommended for production")
 		} else {
-			corsConfig.AllowOrigins = config.CORS.AllowedOrigins
-			log.Printf("[INFO] CORS: Allowing origins: %v", config.CORS.AllowedOrigins)
+			corsConfig.AllowOrigins = config.AllowedOrigins
+			log.Printf("[INFO] CORS: Allowing origins: %v", config.AllowedOrigins)
 		}
 
 		r.Use(cors.New(corsConfig))
@@ -83,10 +83,10 @@ func NewRouter(config Config) (*gin.Engine, error) {
 	rateLimit := pipeline.RateLimitMiddleware(config.RateLimit)
 
 	// Create pipeline components with config
-	semaphore := pipeline.NewSemaphore(config.Semaphore)
+	semaphore := pipeline.NewSemaphore(config.MaxConcurrent)
 	validator := pipeline.NewValidator(config.Validation)
-	preparer := pipeline.NewPreparer(config.Preparer)
-	compiler := pipeline.NewCompiler(config.Compiler)
+	preparer := pipeline.NewPreparer(config.TmpDir)
+	compiler := pipeline.NewCompiler(config.CompileTimeout)
 
 	// Routes
 	r.POST("/api/create", rateLimit, maxBodySize(config.MaxRequestBytes), handleCreateLetter(validator, preparer, compiler, semaphore))

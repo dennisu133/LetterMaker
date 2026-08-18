@@ -24,7 +24,7 @@ func requirePdflatex(t *testing.T) {
 // prepareTestJob renders a valid manual-mode letter into a temp dir.
 func prepareTestJob(t *testing.T) *PreparedJob {
 	t.Helper()
-	p := NewPreparer(PreparerConfig{TmpDir: t.TempDir()})
+	p := NewPreparer(t.TempDir())
 	contentLatex, err := ParseProseMirrorToLatex(`{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Hallo Welt & 100%"}]}]}`)
 	if err != nil {
 		t.Fatalf("parse failed: %v", err)
@@ -40,7 +40,7 @@ func prepareTestJob(t *testing.T) *PreparedJob {
 func TestCompileProducesPDF(t *testing.T) {
 	requirePdflatex(t)
 
-	c := NewCompiler(CompilerConfig{Timeout: 60 * time.Second})
+	c := NewCompiler(60 * time.Second)
 	result, err := c.Compile(context.Background(), prepareTestJob(t))
 	if err != nil {
 		if compileErr, ok := err.(CompileError); ok && compileErr.Log != "" {
@@ -56,7 +56,7 @@ func TestCompileProducesPDF(t *testing.T) {
 func TestCompileTimeout(t *testing.T) {
 	requirePdflatex(t)
 
-	c := NewCompiler(CompilerConfig{Timeout: time.Millisecond})
+	c := NewCompiler(time.Millisecond)
 	_, err := c.Compile(context.Background(), prepareTestJob(t))
 	if err == nil {
 		t.Fatal("expected timeout error, got nil")
@@ -73,7 +73,7 @@ func TestCompileCanceledContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // canceled before the compile starts
 
-	c := NewCompiler(CompilerConfig{Timeout: 60 * time.Second})
+	c := NewCompiler(60 * time.Second)
 	_, err := c.Compile(ctx, prepareTestJob(t))
 	if err == nil {
 		t.Fatal("expected error for canceled context, got nil")
@@ -92,7 +92,7 @@ func TestCompileInvalidLatex(t *testing.T) {
 		t.Fatalf("failed to write tex file: %v", err)
 	}
 
-	c := NewCompiler(CompilerConfig{Timeout: 60 * time.Second})
+	c := NewCompiler(60 * time.Second)
 	_, err := c.Compile(context.Background(), &PreparedJob{Dir: dir, TexFile: texPath})
 	if err == nil {
 		t.Fatal("expected error for invalid LaTeX, got nil")
@@ -110,7 +110,7 @@ func TestCompileInvalidLatex(t *testing.T) {
 }
 
 func TestCompileInvalidJob(t *testing.T) {
-	c := NewCompiler(CompilerConfig{})
+	c := NewCompiler(0)
 	if _, err := c.Compile(context.Background(), nil); err == nil {
 		t.Error("expected error for nil job")
 	}

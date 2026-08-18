@@ -57,16 +57,6 @@ func getBabelLanguage(locale string) string {
 }
 
 // -----------------------------------------------------------------------------
-// Preparer Configuration
-// -----------------------------------------------------------------------------
-
-// PreparerConfig holds configuration for the preparer
-type PreparerConfig struct {
-	// TmpDir is the base directory for temporary files
-	TmpDir string
-}
-
-// -----------------------------------------------------------------------------
 // Prepared Result
 // -----------------------------------------------------------------------------
 
@@ -94,27 +84,27 @@ func (p *PreparedJob) Cleanup() error {
 
 // Preparer creates temporary directories with LaTeX files
 type Preparer struct {
-	cfg PreparerConfig
+	tmpDir string
 }
 
-// NewPreparer creates a new preparer with the given configuration
-func NewPreparer(cfg PreparerConfig) *Preparer {
-	if cfg.TmpDir == "" {
-		cfg.TmpDir = "tmp"
+// NewPreparer creates a preparer using the given base temporary directory.
+func NewPreparer(tmpDir string) *Preparer {
+	if tmpDir == "" {
+		tmpDir = "tmp"
 	}
-	return &Preparer{cfg: cfg}
+	return &Preparer{tmpDir: tmpDir}
 }
 
 // Prepare creates a temporary directory with a LaTeX file ready for compilation.
 // Returns a PreparedJob that must be cleaned up after use (call Cleanup()).
 func (p *Preparer) Prepare(req *LetterRequest, contentLatex string) (*PreparedJob, error) {
 	// Ensure base tmp directory exists
-	if err := os.MkdirAll(p.cfg.TmpDir, 0755); err != nil {
+	if err := os.MkdirAll(p.tmpDir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create base temp directory: %v", err)
 	}
 
 	// Create a unique job directory
-	dirPath, err := os.MkdirTemp(p.cfg.TmpDir, "letter_")
+	dirPath, err := os.MkdirTemp(p.tmpDir, "letter_")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create temp directory: %v", err)
 	}

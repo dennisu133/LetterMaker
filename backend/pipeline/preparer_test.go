@@ -37,7 +37,7 @@ func TestGetBabelLanguage(t *testing.T) {
 }
 
 func TestFormatDate(t *testing.T) {
-	p := NewPreparer(PreparerConfig{TmpDir: t.TempDir()})
+	p := NewPreparer(t.TempDir())
 
 	tests := []struct {
 		locale string
@@ -66,7 +66,7 @@ func TestFormatDate(t *testing.T) {
 
 func TestPrepareManualMode(t *testing.T) {
 	tmpDir := t.TempDir()
-	p := NewPreparer(PreparerConfig{TmpDir: tmpDir})
+	p := NewPreparer(tmpDir)
 
 	req := validManualRequest()
 	req.Subject = "Subject with 100% & specials"
@@ -111,7 +111,7 @@ func TestPrepareManualMode(t *testing.T) {
 
 func TestPrepareStampMode(t *testing.T) {
 	tmpDir := t.TempDir()
-	p := NewPreparer(PreparerConfig{TmpDir: tmpDir})
+	p := NewPreparer(tmpDir)
 
 	req := validManualRequest()
 	req.Mode = ModeStamp
@@ -155,7 +155,7 @@ func TestPrepareStampMode(t *testing.T) {
 }
 
 func TestPrepareCleanup(t *testing.T) {
-	p := NewPreparer(PreparerConfig{TmpDir: t.TempDir()})
+	p := NewPreparer(t.TempDir())
 
 	job, err := p.Prepare(validManualRequest(), "Body")
 	if err != nil {
@@ -171,7 +171,7 @@ func TestPrepareCleanup(t *testing.T) {
 }
 
 func TestPrepareCreatesUniqueDirs(t *testing.T) {
-	p := NewPreparer(PreparerConfig{TmpDir: t.TempDir()})
+	p := NewPreparer(t.TempDir())
 
 	a, err := p.Prepare(validManualRequest(), "Body")
 	if err != nil {

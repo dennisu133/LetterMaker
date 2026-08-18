@@ -14,14 +14,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// CORSConfig holds CORS configuration
-type CORSConfig struct {
-	// AllowedOrigins is a list of origins that are allowed to make requests
-	// Use "*" to allow all origins (not recommended for production)
-	// Use "none" to disable CORS (when behind a reverse proxy that handles it)
-	AllowedOrigins []string
-}
-
 // Config holds the application configuration
 type Config struct {
 	Host           string
@@ -36,8 +28,9 @@ type Config struct {
 	// Gin mode: "debug", "release", or "test"
 	GinMode string
 
-	// CORS configuration
-	CORS CORSConfig
+	// AllowedOrigins is a list of origins that are allowed to make requests.
+	// Use "*" to allow all origins or "none" to disable CORS.
+	AllowedOrigins []string
 
 	// Rate limiting configuration
 	RateLimit pipeline.RateLimitConfig
@@ -45,14 +38,14 @@ type Config struct {
 	// Validation configuration
 	Validation pipeline.ValidationConfig
 
-	// Semaphore configuration (concurrency limiting)
-	Semaphore pipeline.SemaphoreConfig
+	// MaxConcurrent is the maximum number of concurrent compile jobs
+	MaxConcurrent int
 
-	// Preparer configuration
-	Preparer pipeline.PreparerConfig
+	// TmpDir is the base directory for temporary compile files
+	TmpDir string
 
-	// Compiler configuration
-	Compiler pipeline.CompilerConfig
+	// CompileTimeout is the maximum duration for pdflatex to complete
+	CompileTimeout time.Duration
 
 	// Request size limit in bytes
 	MaxRequestBytes int64
@@ -84,17 +77,9 @@ func LoadConfig() Config {
 			MinStampBytes:  getEnvInt64("MIN_STAMP_BYTES", 1024),     // 1 KiB
 		},
 
-		Semaphore: pipeline.SemaphoreConfig{
-			MaxConcurrent: getEnvInt("MAX_CONCURRENT_COMPILES", 2),
-		},
-
-		Preparer: pipeline.PreparerConfig{
-			TmpDir: getEnv("TMP_DIR", "tmp"),
-		},
-
-		Compiler: pipeline.CompilerConfig{
-			Timeout: getEnvDuration("COMPILE_TIMEOUT", 30*time.Second),
-		},
+		MaxConcurrent:  getEnvInt("MAX_CONCURRENT_COMPILES", 2),
+		TmpDir:         getEnv("TMP_DIR", "tmp"),
+		CompileTimeout: getEnvDuration("COMPILE_TIMEOUT", 30*time.Second),
 
 		MaxRequestBytes: getEnvInt64("MAX_REQUEST_BYTES", 5*1024*1024), // 5 MiB
 	}
@@ -104,7 +89,7 @@ func LoadConfig() Config {
 	if corsOrigins != "" && corsOrigins != "none" {
 		for origin := range strings.SplitSeq(corsOrigins, ",") {
 			if trimmed := strings.TrimSpace(origin); trimmed != "" {
-				config.CORS.AllowedOrigins = append(config.CORS.AllowedOrigins, trimmed)
+				config.AllowedOrigins = append(config.AllowedOrigins, trimmed)
 			}
 		}
 	}
@@ -191,11 +176,11 @@ func (c Config) Validate() error {
 			c.Validation.MaxStampBytes, c.Validation.MinStampBytes)
 	}
 
-	if c.Semaphore.MaxConcurrent < 1 {
-		fail("MAX_CONCURRENT_COMPILES must be at least 1, got %d", c.Semaphore.MaxConcurrent)
+	if c.MaxConcurrent < 1 {
+		fail("MAX_CONCURRENT_COMPILES must be at least 1, got %d", c.MaxConcurrent)
 	}
-	if c.Compiler.Timeout <= 0 {
-		fail("COMPILE_TIMEOUT must be positive, got %v", c.Compiler.Timeout)
+	if c.CompileTimeout <= 0 {
+		fail("COMPILE_TIMEOUT must be positive, got %v", c.CompileTimeout)
 	}
 	if c.MaxRequestBytes < 1 {
 		fail("MAX_REQUEST_BYTES must be at least 1, got %d", c.MaxRequestBytes)

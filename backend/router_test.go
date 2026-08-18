@@ -41,9 +41,9 @@ func newTestEngine(t *testing.T, compiler letterCompiler, semaphore *pipeline.Se
 	gin.SetMode(gin.TestMode)
 
 	validator := pipeline.NewValidator(testValidationConfig())
-	preparer := pipeline.NewPreparer(pipeline.PreparerConfig{TmpDir: t.TempDir()})
+	preparer := pipeline.NewPreparer(t.TempDir())
 	if semaphore == nil {
-		semaphore = pipeline.NewSemaphore(pipeline.SemaphoreConfig{MaxConcurrent: 2})
+		semaphore = pipeline.NewSemaphore(2)
 	}
 
 	r := gin.New()
@@ -169,7 +169,7 @@ func TestCreateLetterErrorResponses(t *testing.T) {
 }
 
 func TestCreateLetterBusy(t *testing.T) {
-	semaphore := pipeline.NewSemaphore(pipeline.SemaphoreConfig{MaxConcurrent: 1})
+	semaphore := pipeline.NewSemaphore(1)
 	// Occupy the only slot so the request finds the server busy
 	release, ok := semaphore.TryAcquire()
 	if !ok {
@@ -245,9 +245,9 @@ func testRouterConfig(t *testing.T) Config {
 			CleanupInterval:   time.Minute,
 		},
 		Validation:      testValidationConfig(),
-		Semaphore:       pipeline.SemaphoreConfig{MaxConcurrent: 2},
-		Preparer:        pipeline.PreparerConfig{TmpDir: t.TempDir()},
-		Compiler:        pipeline.CompilerConfig{Timeout: 30 * time.Second},
+		MaxConcurrent:   2,
+		TmpDir:          t.TempDir(),
+		CompileTimeout:  30 * time.Second,
 		MaxRequestBytes: 5 * 1024 * 1024,
 	}
 }

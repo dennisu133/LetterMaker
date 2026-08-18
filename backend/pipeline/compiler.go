@@ -11,16 +11,6 @@ import (
 )
 
 // -----------------------------------------------------------------------------
-// Compiler Configuration
-// -----------------------------------------------------------------------------
-
-// CompilerConfig holds configuration for the LaTeX compiler
-type CompilerConfig struct {
-	// Timeout is the maximum duration for pdflatex to complete
-	Timeout time.Duration
-}
-
-// -----------------------------------------------------------------------------
 // Compile Result
 // -----------------------------------------------------------------------------
 
@@ -70,15 +60,15 @@ func NewCompileTimeoutError(log string) CompileError {
 
 // Compiler runs pdflatex to generate PDFs
 type Compiler struct {
-	cfg CompilerConfig
+	timeout time.Duration
 }
 
-// NewCompiler creates a new compiler with the given configuration
-func NewCompiler(cfg CompilerConfig) *Compiler {
-	if cfg.Timeout <= 0 {
-		cfg.Timeout = 30 * time.Second // sensible default
+// NewCompiler creates a compiler with the given timeout.
+func NewCompiler(timeout time.Duration) *Compiler {
+	if timeout <= 0 {
+		timeout = 30 * time.Second
 	}
-	return &Compiler{cfg: cfg}
+	return &Compiler{timeout: timeout}
 }
 
 // Compile runs pdflatex on the prepared job and returns the generated PDF.
@@ -92,7 +82,7 @@ func (c *Compiler) Compile(ctx context.Context, job *PreparedJob) (*CompileResul
 	}
 
 	// Layer the compile timeout on top of the caller's context
-	ctx, cancel := context.WithTimeout(ctx, c.cfg.Timeout)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 
 	// Get the directory and filename

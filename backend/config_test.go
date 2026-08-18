@@ -26,14 +26,14 @@ func TestLoadConfigDefaults(t *testing.T) {
 	if config.TrustedPlatform != "" {
 		t.Errorf("no platform header should be trusted by default, got %q", config.TrustedPlatform)
 	}
-	if got := config.CORS.AllowedOrigins; len(got) != 2 {
+	if got := config.AllowedOrigins; len(got) != 2 {
 		t.Errorf("unexpected default CORS origins: %v", got)
 	}
 	if config.RateLimit.Burst != 2 || config.RateLimit.RequestsPerSecond != 0.2 {
 		t.Errorf("unexpected default rate limit: %+v", config.RateLimit)
 	}
-	if config.Compiler.Timeout != 30*time.Second {
-		t.Errorf("unexpected default compile timeout: %v", config.Compiler.Timeout)
+	if config.CompileTimeout != 30*time.Second {
+		t.Errorf("unexpected default compile timeout: %v", config.CompileTimeout)
 	}
 	if config.MaxRequestBytes != 5*1024*1024 {
 		t.Errorf("unexpected default request size limit: %d", config.MaxRequestBytes)
@@ -63,8 +63,8 @@ func TestLoadConfigFromEnvironment(t *testing.T) {
 	if config.GinMode != "release" {
 		t.Errorf("GIN_MODE not applied: %s", config.GinMode)
 	}
-	if len(config.CORS.AllowedOrigins) != 2 || config.CORS.AllowedOrigins[1] != "https://other.example" {
-		t.Errorf("CORS_ORIGINS not parsed/trimmed: %v", config.CORS.AllowedOrigins)
+	if len(config.AllowedOrigins) != 2 || config.AllowedOrigins[1] != "https://other.example" {
+		t.Errorf("CORS_ORIGINS not parsed/trimmed: %v", config.AllowedOrigins)
 	}
 	if len(config.TrustedProxies) != 0 {
 		t.Errorf("TRUSTED_PROXIES=none should clear proxies: %v", config.TrustedProxies)
@@ -78,8 +78,8 @@ func TestLoadConfigFromEnvironment(t *testing.T) {
 	if config.RateLimit.EntryTTL != time.Hour {
 		t.Errorf("RATE_LIMIT_TTL not applied: %v", config.RateLimit.EntryTTL)
 	}
-	if config.Semaphore.MaxConcurrent != 4 {
-		t.Errorf("MAX_CONCURRENT_COMPILES not applied: %d", config.Semaphore.MaxConcurrent)
+	if config.MaxConcurrent != 4 {
+		t.Errorf("MAX_CONCURRENT_COMPILES not applied: %d", config.MaxConcurrent)
 	}
 	if config.MaxRequestBytes != 1048576 {
 		t.Errorf("MAX_REQUEST_BYTES not applied: %d", config.MaxRequestBytes)
@@ -89,8 +89,8 @@ func TestLoadConfigFromEnvironment(t *testing.T) {
 func TestLoadConfigDisableCORS(t *testing.T) {
 	t.Setenv("CORS_ORIGINS", "none")
 	config := loadIsolated(t)
-	if len(config.CORS.AllowedOrigins) != 0 {
-		t.Errorf("CORS_ORIGINS=none should disable CORS: %v", config.CORS.AllowedOrigins)
+	if len(config.AllowedOrigins) != 0 {
+		t.Errorf("CORS_ORIGINS=none should disable CORS: %v", config.AllowedOrigins)
 	}
 }
 
@@ -101,8 +101,8 @@ func TestLoadConfigInvalidValuesFallBack(t *testing.T) {
 	if config.RateLimit.RequestsPerSecond != 0.2 {
 		t.Errorf("unparseable RPS should fall back to default: %v", config.RateLimit.RequestsPerSecond)
 	}
-	if config.Compiler.Timeout != 30*time.Second {
-		t.Errorf("unparseable timeout should fall back to default: %v", config.Compiler.Timeout)
+	if config.CompileTimeout != 30*time.Second {
+		t.Errorf("unparseable timeout should fall back to default: %v", config.CompileTimeout)
 	}
 }
 

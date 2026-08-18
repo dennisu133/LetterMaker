@@ -1,19 +1,12 @@
 package pipeline
 
-// SemaphoreConfig controls the compile semaphore
-type SemaphoreConfig struct {
-	// MaxConcurrent is the maximum number of concurrent expensive jobs
-	MaxConcurrent int
-}
-
 // Semaphore manages concurrent access to expensive operations using a channel
 type Semaphore struct {
 	ch chan struct{}
 }
 
-// NewSemaphore creates a semaphore with the given configuration.
-func NewSemaphore(cfg SemaphoreConfig) *Semaphore {
-	maxConcurrent := cfg.MaxConcurrent
+// NewSemaphore creates a semaphore with the given capacity.
+func NewSemaphore(maxConcurrent int) *Semaphore {
 	if maxConcurrent <= 0 {
 		maxConcurrent = 2 // sensible default
 	}
