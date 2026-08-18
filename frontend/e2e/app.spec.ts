@@ -41,6 +41,16 @@ test("creates a new paragraph when pressing Enter in the editor", async ({ page 
 	await expect(editor.locator("p").nth(1)).toHaveText("Second paragraph");
 });
 
+test("keeps the toolbar in sync with keyboard formatting", async ({ page }) => {
+	await page.locator("#content").click();
+	const bold = page.getByRole("button", { name: "Bold" });
+
+	await page.keyboard.press("Control+b");
+	await expect(bold).toHaveAttribute("aria-pressed", "true");
+	await page.keyboard.press("Control+b");
+	await expect(bold).toHaveAttribute("aria-pressed", "false");
+});
+
 test("updates all editor affordances when switching language", async ({ page }) => {
 	await page.getByRole("button", { name: "Switch language" }).click();
 	await page.getByRole("menuitem", { name: "🇩🇪 Deutsch" }).click();

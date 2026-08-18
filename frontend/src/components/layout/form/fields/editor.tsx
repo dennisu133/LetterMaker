@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 
 import CharacterCount from "@tiptap/extension-character-count";
 import Placeholder from "@tiptap/extension-placeholder";
-import { EditorContent, useEditor, type Editor } from "@tiptap/react";
+import { EditorContent, useEditor, useEditorState, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 
 import {
@@ -40,7 +40,8 @@ import {
 	Pilcrow,
 	Quote,
 	Strikethrough,
-	Underline as UnderlineIcon
+	Underline as UnderlineIcon,
+	type LucideIcon
 } from "lucide-react";
 import * as React from "react";
 import { Controller, useFormContext } from "react-hook-form";
@@ -50,80 +51,68 @@ interface EditorToolbarProps {
 	editor: Editor;
 }
 
+interface ToolbarToggleButtonProps {
+	active: boolean;
+	icon: LucideIcon;
+	label: string;
+	onPressedChange: () => void;
+}
+
+const headingIcons = [Pilcrow, Heading1, Heading2, Heading3] as const;
+
+function ToolbarToggleButton({
+	active,
+	icon: Icon,
+	label,
+	onPressedChange
+}: ToolbarToggleButtonProps) {
+	return (
+		<Tooltip>
+			<TooltipTrigger
+				render={
+					<Toggle
+						className={toolbarToggleClass}
+						size="sm-responsive"
+						aria-label={label}
+						pressed={active}
+						onPressedChange={onPressedChange}
+					/>
+				}
+			>
+				<Icon className={toolbarIconClass} />
+			</TooltipTrigger>
+			<TooltipContent>
+				<p>{label}</p>
+			</TooltipContent>
+		</Tooltip>
+	);
+}
+
 const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 	const { t } = useTranslation();
-
-	// Force re-render on editor state changes
-	const [, forceUpdate] = React.useReducer((x) => x + 1, 0);
-
-	React.useEffect(() => {
-		// Only listen to selection updates for toolbar state, not every transaction
-		editor.on("selectionUpdate", forceUpdate);
-
-		return () => {
-			editor.off("selectionUpdate", forceUpdate);
-		};
-	}, [editor]);
-
-	const handleBold = () => {
-		editor.chain().focus().toggleBold().run();
-		forceUpdate();
-	};
-	const handleItalic = () => {
-		editor.chain().focus().toggleItalic().run();
-		forceUpdate();
-	};
-	const handleUnderline = () => {
-		editor.chain().focus().toggleUnderline().run();
-		forceUpdate();
-	};
-	const handleStrike = () => {
-		editor.chain().focus().toggleStrike().run();
-		forceUpdate();
-	};
-	const handleBulletList = () => {
-		editor.chain().focus().toggleBulletList().run();
-		forceUpdate();
-	};
-	const handleOrderedList = () => {
-		editor.chain().focus().toggleOrderedList().run();
-		forceUpdate();
-	};
-	const handleBlockquote = () => {
-		editor.chain().focus().toggleBlockquote().run();
-		forceUpdate();
-	};
-	const handleClearFormatting = () => {
-		editor.chain().focus().unsetAllMarks().clearNodes().run();
-	};
-
-	const handleHeading = (level: 1 | 2 | 3) => {
-		editor.chain().focus().toggleHeading({ level }).run();
-		forceUpdate();
-	};
-
-	const handleParagraph = () => {
-		editor.chain().focus().setParagraph().run();
-		forceUpdate();
-	};
-
-	// Determine current heading state for display
-	const getCurrentHeadingLabel = () => {
-		if (editor.isActive("heading", { level: 1 }))
-			return { label: t("content.editor.heading1"), icon: Heading1 };
-		if (editor.isActive("heading", { level: 2 }))
-			return { label: t("content.editor.heading2"), icon: Heading2 };
-		if (editor.isActive("heading", { level: 3 }))
-			return { label: t("content.editor.heading3"), icon: Heading3 };
-		return { label: t("content.editor.paragraph"), icon: Pilcrow };
-	};
-
-	const currentHeading = getCurrentHeadingLabel();
-	const CurrentIcon = currentHeading.icon;
+	const state = useEditorState({
+		editor,
+		selector: ({ editor }) => ({
+			bold: editor.isActive("bold"),
+			italic: editor.isActive("italic"),
+			underline: editor.isActive("underline"),
+			strike: editor.isActive("strike"),
+			bulletList: editor.isActive("bulletList"),
+			orderedList: editor.isActive("orderedList"),
+			blockquote: editor.isActive("blockquote"),
+			heading: editor.isActive("heading", { level: 1 })
+				? 1
+				: editor.isActive("heading", { level: 2 })
+					? 2
+					: editor.isActive("heading", { level: 3 })
+						? 3
+						: 0
+		})
+	});
+	const CurrentIcon = headingIcons[state.heading];
 
 	return (
 		<div className={toolbarClass}>
-			{/* Heading Dropdown */}
 			<DropdownMenu>
 				<Tooltip>
 					<TooltipTrigger
@@ -148,19 +137,25 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 					</TooltipContent>
 				</Tooltip>
 				<DropdownMenuContent align="start">
-					<DropdownMenuItem onClick={handleParagraph}>
+					<DropdownMenuItem onClick={() => editor.chain().focus().setParagraph().run()}>
 						<Pilcrow className="size-4" />
 						{t("content.editor.paragraph")}
 					</DropdownMenuItem>
-					<DropdownMenuItem onClick={() => handleHeading(1)}>
+					<DropdownMenuItem
+						onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+					>
 						<Heading1 className="size-4" />
 						{t("content.editor.heading1")}
 					</DropdownMenuItem>
-					<DropdownMenuItem onClick={() => handleHeading(2)}>
+					<DropdownMenuItem
+						onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+					>
 						<Heading2 className="size-4" />
 						{t("content.editor.heading2")}
 					</DropdownMenuItem>
-					<DropdownMenuItem onClick={() => handleHeading(3)}>
+					<DropdownMenuItem
+						onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+					>
 						<Heading3 className="size-4" />
 						{t("content.editor.heading3")}
 					</DropdownMenuItem>
@@ -169,151 +164,55 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 
 			<Separator orientation="vertical" className={toolbarSeparatorClass} />
 
-			{/* Bold */}
-			<Tooltip>
-				<TooltipTrigger
-					render={
-						<Toggle
-							className={toolbarToggleClass}
-							size="sm-responsive"
-							aria-label={t("content.editor.bold")}
-							pressed={editor.isActive("bold")}
-							onPressedChange={handleBold}
-						/>
-					}
-				>
-					<Bold className={toolbarIconClass} />
-				</TooltipTrigger>
-				<TooltipContent>
-					<p>{t("content.editor.bold")}</p>
-				</TooltipContent>
-			</Tooltip>
-
-			{/* Italic */}
-			<Tooltip>
-				<TooltipTrigger
-					render={
-						<Toggle
-							className={toolbarToggleClass}
-							size="sm-responsive"
-							aria-label={t("content.editor.italic")}
-							pressed={editor.isActive("italic")}
-							onPressedChange={handleItalic}
-						/>
-					}
-				>
-					<Italic className={toolbarIconClass} />
-				</TooltipTrigger>
-				<TooltipContent>
-					<p>{t("content.editor.italic")}</p>
-				</TooltipContent>
-			</Tooltip>
-
-			{/* Underline */}
-			<Tooltip>
-				<TooltipTrigger
-					render={
-						<Toggle
-							className={toolbarToggleClass}
-							size="sm-responsive"
-							aria-label={t("content.editor.underline")}
-							pressed={editor.isActive("underline")}
-							onPressedChange={handleUnderline}
-						/>
-					}
-				>
-					<UnderlineIcon className={toolbarIconClass} />
-				</TooltipTrigger>
-				<TooltipContent>
-					<p>{t("content.editor.underline")}</p>
-				</TooltipContent>
-			</Tooltip>
-
-			{/* Strikethrough */}
-			<Tooltip>
-				<TooltipTrigger
-					render={
-						<Toggle
-							className={toolbarToggleClass}
-							size="sm-responsive"
-							aria-label={t("content.editor.strikethrough")}
-							pressed={editor.isActive("strike")}
-							onPressedChange={handleStrike}
-						/>
-					}
-				>
-					<Strikethrough className={toolbarIconClass} />
-				</TooltipTrigger>
-				<TooltipContent>
-					<p>{t("content.editor.strikethrough")}</p>
-				</TooltipContent>
-			</Tooltip>
+			<ToolbarToggleButton
+				label={t("content.editor.bold")}
+				icon={Bold}
+				active={state.bold}
+				onPressedChange={() => editor.chain().focus().toggleBold().run()}
+			/>
+			<ToolbarToggleButton
+				label={t("content.editor.italic")}
+				icon={Italic}
+				active={state.italic}
+				onPressedChange={() => editor.chain().focus().toggleItalic().run()}
+			/>
+			<ToolbarToggleButton
+				label={t("content.editor.underline")}
+				icon={UnderlineIcon}
+				active={state.underline}
+				onPressedChange={() => editor.chain().focus().toggleUnderline().run()}
+			/>
+			<ToolbarToggleButton
+				label={t("content.editor.strikethrough")}
+				icon={Strikethrough}
+				active={state.strike}
+				onPressedChange={() => editor.chain().focus().toggleStrike().run()}
+			/>
 
 			<Separator orientation="vertical" className={toolbarSeparatorClass} />
 
-			{/* Bullet List */}
-			<Tooltip>
-				<TooltipTrigger
-					render={
-						<Toggle
-							className={toolbarToggleClass}
-							size="sm-responsive"
-							aria-label={t("content.editor.bullet_list")}
-							pressed={editor.isActive("bulletList")}
-							onPressedChange={handleBulletList}
-						/>
-					}
-				>
-					<List className={toolbarIconClass} />
-				</TooltipTrigger>
-				<TooltipContent>
-					<p>{t("content.editor.bullet_list")}</p>
-				</TooltipContent>
-			</Tooltip>
-
-			{/* Ordered List */}
-			<Tooltip>
-				<TooltipTrigger
-					render={
-						<Toggle
-							className={toolbarToggleClass}
-							size="sm-responsive"
-							aria-label={t("content.editor.ordered_list")}
-							pressed={editor.isActive("orderedList")}
-							onPressedChange={handleOrderedList}
-						/>
-					}
-				>
-					<ListOrdered className={toolbarIconClass} />
-				</TooltipTrigger>
-				<TooltipContent>
-					<p>{t("content.editor.ordered_list")}</p>
-				</TooltipContent>
-			</Tooltip>
+			<ToolbarToggleButton
+				label={t("content.editor.bullet_list")}
+				icon={List}
+				active={state.bulletList}
+				onPressedChange={() => editor.chain().focus().toggleBulletList().run()}
+			/>
+			<ToolbarToggleButton
+				label={t("content.editor.ordered_list")}
+				icon={ListOrdered}
+				active={state.orderedList}
+				onPressedChange={() => editor.chain().focus().toggleOrderedList().run()}
+			/>
 
 			<Separator orientation="vertical" className={toolbarSeparatorClass} />
 
-			{/* Blockquote */}
-			<Tooltip>
-				<TooltipTrigger
-					render={
-						<Toggle
-							className={toolbarToggleClass}
-							size="sm-responsive"
-							aria-label={t("content.editor.blockquote")}
-							pressed={editor.isActive("blockquote")}
-							onPressedChange={handleBlockquote}
-						/>
-					}
-				>
-					<Quote className={toolbarIconClass} />
-				</TooltipTrigger>
-				<TooltipContent>
-					<p>{t("content.editor.blockquote")}</p>
-				</TooltipContent>
-			</Tooltip>
+			<ToolbarToggleButton
+				label={t("content.editor.blockquote")}
+				icon={Quote}
+				active={state.blockquote}
+				onPressedChange={() => editor.chain().focus().toggleBlockquote().run()}
+			/>
 
-			{/* Remove Formatting */}
 			<Tooltip>
 				<TooltipTrigger
 					render={
@@ -322,7 +221,7 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 							size="sm"
 							className={toolbarSquareButtonClass}
 							aria-label={t("content.editor.remove_formatting")}
-							onClick={handleClearFormatting}
+							onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
 						/>
 					}
 				>
