@@ -85,8 +85,7 @@
 	"content": {
 		"title": "Inhalt",
 		"date": {
-			"label": "Datum",
-			"placeholder": "Datum auswählen"
+			"label": "Datum"
 		},
 		"subject": {
 			"label": "Betreff",

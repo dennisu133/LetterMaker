@@ -5,28 +5,20 @@ import { useTranslation } from "react-i18next";
 
 import { Formalities } from "@/components/common/formalities";
 import { useFormalities } from "@/components/formalities-provider";
-import { Button } from "@/components/ui/button";
 import { FreeFormCombobox } from "@/components/ui/combobox";
 import { Field, FieldError } from "@/components/ui/field";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { MAX_INPUT, MAX_TEXT_AREA } from "@/lib/constants";
-import { formatLocalDate, parseLocalDate } from "@/lib/date";
 import type { FormValues } from "@/lib/formSchema";
 import { inkInput, quietControl } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
 const MAX_SUBJECT_LINES = 5;
 
-const Calendar = React.lazy(async () => {
-	const module = await import("@/components/ui/localized-calendar");
-	return { default: module.LocalizedCalendar };
-});
-
 export function DetailsSection() {
-	const [dateOpen, setDateOpen] = React.useState(false);
 	const {
 		control,
 		formState: { errors }
@@ -34,16 +26,6 @@ export function DetailsSection() {
 
 	const { i18n, t } = useTranslation();
 	const { language: formalitiesLanguage } = useFormalities();
-
-	const dateFormatter = React.useMemo(
-		() =>
-			new Intl.DateTimeFormat(i18n.resolvedLanguage ?? i18n.language, {
-				day: "2-digit",
-				month: "2-digit",
-				year: "numeric"
-			}),
-		[i18n.language, i18n.resolvedLanguage]
-	);
 
 	// Get salutations from the formalities language locale
 	const salutations = React.useMemo(() => {
@@ -64,56 +46,27 @@ export function DetailsSection() {
 
 	return (
 		<div className="mt-5 flex flex-col gap-4 sm:mt-7 sm:gap-5">
-			{/* The date sits right-aligned like on a printed letter */}
-			<Field data-invalid={!!errors.date} className="items-end [&>*]:w-auto">
+			<Field data-invalid={!!errors.date} className="items-end">
 				<label htmlFor="date" className="sr-only">
 					{t("content.date.label") + "\u2009*"}
 				</label>
 				<Controller
 					name="date"
 					control={control}
-					render={({ field, fieldState }) => {
-						const dateValue = parseLocalDate(field.value);
-						return (
-							<Popover open={dateOpen} onOpenChange={setDateOpen}>
-								<PopoverTrigger
-									id="date"
-									render={(props) => (
-										<Button
-											{...props}
-											variant="ghost"
-											className={cn(
-												"group border-paper-line hover:border-paper-muted h-auto gap-2 rounded-none border-0 border-b border-dashed bg-transparent px-0 py-0.5 font-serif text-[1rem] font-normal",
-												quietControl,
-												"text-paper-foreground hover:bg-transparent dark:hover:bg-transparent",
-												!dateValue && "text-paper-faint",
-												fieldState.error && "border-destructive border-solid"
-											)}
-											aria-invalid={!!fieldState.error}
-											aria-describedby={fieldState.error ? "date-error" : undefined}
-										>
-											{dateValue ? dateFormatter.format(dateValue) : t("content.date.placeholder")}
-											<CalendarIcon className="text-paper-muted size-4 opacity-60 transition-opacity group-hover:opacity-100" />
-										</Button>
-									)}
-								/>
-								<PopoverContent className="w-auto overflow-hidden p-0" align="end">
-									<React.Suspense fallback={<div className="size-72" aria-hidden="true" />}>
-										<Calendar
-											mode="single"
-											className="bg-popover"
-											selected={dateValue}
-											captionLayout="dropdown"
-											onSelect={(date) => {
-												field.onChange(date ? formatLocalDate(date) : "");
-												setDateOpen(false);
-											}}
-										/>
-									</React.Suspense>
-								</PopoverContent>
-							</Popover>
-						);
-					}}
+					render={({ field, fieldState }) => (
+						<div className="group relative">
+							<Input
+								{...field}
+								id="date"
+								type="date"
+								lang={i18n.resolvedLanguage ?? i18n.language}
+								className={cn(inkInput, "[&::-webkit-calendar-picker-indicator]:opacity-0")}
+								aria-invalid={!!fieldState.error}
+								aria-describedby={fieldState.error ? "date-error" : undefined}
+							/>
+							<CalendarIcon className="text-paper-muted pointer-events-none absolute top-1/2 right-0 size-4 -translate-y-1/2 opacity-60 transition-opacity group-hover:opacity-100" />
+						</div>
+					)}
 				/>
 				<FieldError id="date-error" className="text-right">
 					{errors.date && t("form.validation.date")}
@@ -166,7 +119,7 @@ export function DetailsSection() {
 								id="salutation"
 								maxLength={MAX_INPUT}
 								placeholder={t("content.salutation.placeholder")}
-								className={cn(inkInput, "flex-1 text-[1.05rem] md:text-[1.05rem]")}
+								className={cn(inkInput, "flex-1")}
 								onBlur={field.onBlur}
 								triggerAriaLabel={t("content.salutation.label")}
 								aria-invalid={!!fieldState.error}
@@ -184,7 +137,7 @@ export function DetailsSection() {
 									render={
 										<Toggle
 											size="sm"
-											className={cn(quietControl, "font-serif text-[1.05rem] md:text-[1.05rem]")}
+											className={cn(quietControl, "font-serif text-lg")}
 											pressed={field.value}
 											onPressedChange={field.onChange}
 										/>

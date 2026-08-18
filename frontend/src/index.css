@@ -47,6 +47,8 @@
 }
 
 :root {
+	color-scheme: light;
+
 	/* Desk chrome (navbar, footer, dialogs) */
 	--background: oklch(0.88 0.014 80);
 	--foreground: oklch(0.27 0.02 60);
@@ -86,6 +88,8 @@
 }
 
 .dark {
+	color-scheme: dark;
+
 	/* Night desk: dark warm wood, a pool of lamplight, dimmed cream paper */
 	--background: oklch(0.185 0.012 60);
 	--foreground: oklch(0.85 0.018 82);

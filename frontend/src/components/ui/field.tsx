@@ -6,7 +6,7 @@ function Field({ className, ...props }: React.ComponentProps<"div">) {
 			role="group"
 			data-slot="field"
 			className={cn(
-				"data-[invalid=true]:text-destructive group/field flex w-full flex-col gap-1 [&>*]:w-full [&>.sr-only]:w-auto",
+				"data-[invalid=true]:text-destructive group/field flex w-full flex-col gap-1",
 				className
 			)}
 			{...props}

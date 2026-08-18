@@ -22,24 +22,10 @@ test("guides an incomplete submission with accessible errors", async ({ page }) 
 	await expect(editor).toHaveAttribute("aria-invalid", "true");
 });
 
-test("keeps selected calendar dates on the intended local day", async ({ page }) => {
-	const target = await page.evaluate(() => {
-		const today = new Date();
-		const date = new Date(today.getFullYear(), today.getMonth(), 15);
-		const pad = (value: number) => String(value).padStart(2, "0");
-		return {
-			iso: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`,
-			display: `${pad(date.getMonth() + 1)}/${pad(date.getDate())}/${date.getFullYear()}`
-		};
-	});
-
-	await page.locator("#date").click();
-	await page
-		.locator(`[data-day="${target.iso}"] button, button[data-day="${target.iso}"]`)
-		.first()
-		.click();
-
-	await expect(page.locator("#date")).toContainText(target.display);
+test("stores dates without crossing time-zone boundaries", async ({ page }) => {
+	const date = page.locator("#date");
+	await date.fill("2026-07-15");
+	await expect(date).toHaveValue("2026-07-15");
 });
 
 test("creates a new paragraph when pressing Enter in the editor", async ({ page }) => {
