@@ -1,6 +1,5 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { lazy, Suspense, useCallback, useEffect } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { FormProvider, useForm, type Resolver } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useFormActionsRegister, useStamp } from "@/components/form-actions-provider";
@@ -12,7 +11,7 @@ import { SubmissionProvider, useSubmission } from "@/components/submission-provi
 import { openPdfInNewTab, submitLetter } from "@/lib/api";
 import { todayLocalDate } from "@/lib/date";
 import { createEmptyFormValues } from "@/lib/formDefaults";
-import { formSchema, type FormValues } from "@/lib/formSchema";
+import type { FormValues } from "@/lib/formSchema";
 
 // Keep the tiptap editor out of the critical chunk; a flex spacer holds the
 // layout until it arrives.
@@ -21,6 +20,67 @@ const ContentSection = lazy(async () => {
 	return { default: module.ContentSection };
 });
 
+const resolveForm: Resolver<FormValues> = async (values, context, options) => {
+	const [{ zodResolver }, { formSchema }] = await Promise.all([
+		import("@hookform/resolvers/zod"),
+		import("@/lib/formSchema")
+	]);
+	return zodResolver(formSchema)(values, context, options);
+};
+
+function DeferredLetterBody() {
+	const [shouldLoad, setShouldLoad] = useState(false);
+	const [focusEditorOnMount, setFocusEditorOnMount] = useState(false);
+	const placeholderRef = useRef<HTMLButtonElement>(null);
+	const { t } = useTranslation();
+
+	useEffect(() => {
+		const placeholder = placeholderRef.current;
+		if (!placeholder || typeof IntersectionObserver === "undefined") {
+			setShouldLoad(true);
+			return;
+		}
+
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (!entry?.isIntersecting) return;
+				setFocusEditorOnMount(document.activeElement === placeholder);
+				setShouldLoad(true);
+				observer.disconnect();
+			},
+			{ threshold: 1 }
+		);
+		observer.observe(placeholder);
+
+		return () => observer.disconnect();
+	}, []);
+
+	if (!shouldLoad) {
+		return (
+			<button
+				ref={placeholderRef}
+				type="button"
+				onClick={() => {
+					setFocusEditorOnMount(true);
+					setShouldLoad(true);
+				}}
+				className="text-paper-faint border-paper-line mt-5 min-h-64 flex-1 cursor-text border-b border-dashed py-2 text-left font-serif sm:mt-6"
+			>
+				{t("content.editor.placeholder")}
+			</button>
+		);
+	}
+
+	return (
+		<>
+			<Suspense fallback={<div className="mt-5 min-h-28 flex-1 sm:mt-6" aria-hidden="true" />}>
+				<ContentSection focusOnMount={focusEditorOnMount} />
+			</Suspense>
+			<ClosingSection />
+		</>
+	);
+}
+
 function LetterFormContent() {
 	const { t } = useTranslation();
 	const { register: registerActions } = useFormActionsRegister();
@@ -28,7 +88,7 @@ function LetterFormContent() {
 	const { setSubmitting, setError } = useSubmission();
 
 	const form = useForm<FormValues>({
-		resolver: zodResolver(formSchema),
+		resolver: resolveForm,
 		defaultValues: createEmptyFormValues()
 	});
 
@@ -129,10 +189,7 @@ function LetterFormContent() {
 
 					<DetailsSection />
 
-					<Suspense fallback={<div className="flex-1" aria-hidden="true" />}>
-						<ContentSection />
-					</Suspense>
-					<ClosingSection />
+					<DeferredLetterBody />
 				</div>
 			</form>
 		</FormProvider>

@@ -247,9 +247,10 @@ interface TipTapEditorProps {
 	onChange: (value: string) => void;
 	onBlur: () => void;
 	hasError?: boolean;
+	focusOnMount?: boolean;
 }
 
-function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) {
+function TipTapEditor({ value, onChange, onBlur, hasError, focusOnMount }: TipTapEditorProps) {
 	const { i18n, t } = useTranslation();
 	const placeholder = t("content.editor.placeholder");
 	const editorLabel = t("content.editor.label");
@@ -300,6 +301,7 @@ function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) 
 	}, []);
 
 	const editor = useEditor({
+		autofocus: focusOnMount ? "end" : false,
 		extensions: [
 			StarterKit.configure({
 				heading: {
@@ -375,7 +377,7 @@ function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) 
 	);
 }
 
-export function ContentSection() {
+export function ContentSection({ focusOnMount = false }: { focusOnMount?: boolean }) {
 	const { t } = useTranslation();
 	const {
 		control,
@@ -398,6 +400,7 @@ export function ContentSection() {
 						onChange={field.onChange}
 						onBlur={field.onBlur}
 						hasError={hasError}
+						focusOnMount={focusOnMount}
 					/>
 				)}
 			/>
