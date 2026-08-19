@@ -36,6 +36,10 @@
 		}
 	},
 	"form": {
+		"confirm": {
+			"reset": "Diesen Brief verwerfen und neu beginnen? Dies kann nicht rückgängig gemacht werden.",
+			"example": "Diesen Brief durch das Beispiel ersetzen? Dies kann nicht rückgängig gemacht werden."
+		},
 		"validation": {
 			"senderName": "Der Absendername ist zu lang.",
 			"senderAddress": "Die Absenderadresse ist zu lang.",

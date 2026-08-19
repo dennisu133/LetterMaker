@@ -91,6 +91,7 @@ function LetterFormContent() {
 		resolver: resolveForm,
 		defaultValues: createEmptyFormValues()
 	});
+	const isDirty = form.formState.isDirty;
 
 	// Sync form mode with stamp context
 	useEffect(() => {
@@ -110,11 +111,14 @@ function LetterFormContent() {
 	useEffect(() => {
 		registerActions({
 			resetForm: () => {
+				if ((isDirty || stamp.isValid) && !window.confirm(t("form.confirm.reset"))) return;
 				form.reset();
 				clearStamp();
 				setError(null);
 			},
 			fillExample: () => {
+				if (isDirty && !window.confirm(t("form.confirm.example"))) return;
+
 				const commonValues = {
 					date: todayLocalDate(),
 					subject: t("example.subject"),
@@ -141,7 +145,7 @@ function LetterFormContent() {
 				form.reset(values, { keepDefaultValues: true });
 			}
 		});
-	}, [registerActions, form, t, stamp.isValid, stamp.file, clearStamp, setError]);
+	}, [registerActions, form, t, stamp.isValid, stamp.file, clearStamp, setError, isDirty]);
 
 	const onSubmit = useCallback(
 		async (data: FormValues) => {

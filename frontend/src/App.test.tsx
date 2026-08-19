@@ -58,6 +58,7 @@ describe("LetterMaker", () => {
 
 	it("fills and resets the complete example letter", async () => {
 		const user = userEvent.setup();
+		const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
 		render(<App />);
 
 		await user.click(screen.getByRole("button", { name: "Example" }));
@@ -78,16 +79,39 @@ describe("LetterMaker", () => {
 		expect(within(recipientGroup).getByRole("textbox", { name: /Name/ })).toHaveValue("");
 		expect(screen.getByRole("textbox", { name: "Subject *" })).toHaveValue("");
 		expect(screen.getByRole("textbox", { name: "Letter content" })).toHaveTextContent("");
+		expect(confirm).toHaveBeenCalledWith(
+			"Discard this letter and start over? This cannot be undone."
+		);
 	});
 
-	it("resets the letter from the title", async () => {
-		const user = userEvent.setup();
+	it("renders the title as a plain heading", () => {
 		render(<App />);
 
-		await user.click(screen.getByRole("button", { name: "Example" }));
-		await user.click(screen.getByRole("button", { name: "LetterMaker" }));
+		expect(screen.getByRole("heading", { name: "LetterMaker" })).toBeVisible();
+		expect(screen.queryByRole("button", { name: "LetterMaker" })).not.toBeInTheDocument();
+	});
 
-		expect(screen.getByRole("textbox", { name: "Subject *" })).toHaveValue("");
+	it("preserves a dirty letter when destructive actions are cancelled", async () => {
+		const user = userEvent.setup();
+		const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+		render(<App />);
+		const subject = screen.getByRole("textbox", { name: "Subject *" });
+
+		await user.type(subject, "Keep me");
+		await user.click(screen.getByRole("button", { name: "Reset" }));
+		expect(subject).toHaveValue("Keep me");
+
+		await user.click(screen.getByRole("button", { name: "Example" }));
+		expect(subject).toHaveValue("Keep me");
+
+		expect(confirm).toHaveBeenNthCalledWith(
+			1,
+			"Discard this letter and start over? This cannot be undone."
+		);
+		expect(confirm).toHaveBeenNthCalledWith(
+			2,
+			"Replace this letter with the example? This cannot be undone."
+		);
 	});
 
 	it("submits a complete letter and opens the PDF", async () => {

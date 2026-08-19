@@ -13,15 +13,8 @@ export function Navbar() {
 	return (
 		<nav className="border-border/70 border-b px-3 py-2 sm:px-6">
 			<div className="mx-auto flex max-w-6xl items-center justify-between gap-2">
-				<h1 className="shrink-0">
-					<Button
-						variant="ghost"
-						type="button"
-						className="h-auto px-0 py-0 font-serif text-lg font-semibold tracking-tight hover:bg-transparent hover:underline sm:text-2xl dark:hover:bg-transparent"
-						onClick={() => formActions?.resetForm()}
-					>
-						{t("title")}
-					</Button>
+				<h1 className="shrink-0 font-serif text-lg font-semibold tracking-tight sm:text-2xl">
+					{t("title")}
 				</h1>
 
 				<div className="flex items-center gap-1.5 sm:gap-3">

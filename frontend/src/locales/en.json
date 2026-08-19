@@ -36,6 +36,10 @@
 		}
 	},
 	"form": {
+		"confirm": {
+			"reset": "Discard this letter and start over? This cannot be undone.",
+			"example": "Replace this letter with the example? This cannot be undone."
+		},
 		"validation": {
 			"senderName": "The sender name is too long.",
 			"senderAddress": "The sender address is too long.",
