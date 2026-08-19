@@ -1,4 +1,5 @@
 import i18n from "i18next";
+import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 
 import { supportedLanguages } from "@/i18n";
@@ -18,7 +19,7 @@ const getLanguageFromI18n = (): FormalitiesLanguage => {
 	return supportedLanguages.includes(i18nLang) ? i18nLang : "en";
 };
 
-export function FormalitiesProvider({ children }: { children: React.ReactNode }) {
+export function FormalitiesProvider({ children }: { children: ReactNode }) {
 	const [language, setLanguageState] = useState<FormalitiesLanguage>(() => {
 		// Prioritise localStorage if user manually changed it, otherwise use i18next's detected language
 		const stored = localStorage.getItem("formalities-language");

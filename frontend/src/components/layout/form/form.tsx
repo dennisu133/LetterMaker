@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as React from "react";
+import { lazy, Suspense, useCallback, useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -16,7 +16,7 @@ import { formSchema, type FormValues } from "@/lib/formSchema";
 
 // Keep the tiptap editor out of the critical chunk; a flex spacer holds the
 // layout until it arrives.
-const ContentSection = React.lazy(async () => {
+const ContentSection = lazy(async () => {
 	const module = await import("@/components/layout/form/fields/editor");
 	return { default: module.ContentSection };
 });
@@ -33,7 +33,7 @@ function LetterFormContent() {
 	});
 
 	// Sync form mode with stamp context
-	React.useEffect(() => {
+	useEffect(() => {
 		if (stamp.isValid && stamp.file) {
 			// Switch to stamp mode and set the file
 			form.setValue("mode", "stamp");
@@ -47,7 +47,7 @@ function LetterFormContent() {
 	}, [stamp.isValid, stamp.file, form]);
 
 	// Register form actions for the navbar
-	React.useEffect(() => {
+	useEffect(() => {
 		registerActions({
 			fillExample: () => {
 				const commonValues = {
@@ -78,7 +78,7 @@ function LetterFormContent() {
 		});
 	}, [registerActions, form, t, stamp.isValid, stamp.file]);
 
-	const onSubmit = React.useCallback(
+	const onSubmit = useCallback(
 		async (data: FormValues) => {
 			setSubmitting(true);
 			setError(null);
@@ -124,9 +124,9 @@ function LetterFormContent() {
 
 					<DetailsSection />
 
-					<React.Suspense fallback={<div className="flex-1" aria-hidden="true" />}>
+					<Suspense fallback={<div className="flex-1" aria-hidden="true" />}>
 						<ContentSection />
-					</React.Suspense>
+					</Suspense>
 					<ClosingSection />
 				</div>
 			</form>

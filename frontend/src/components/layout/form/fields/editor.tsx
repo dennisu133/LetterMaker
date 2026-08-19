@@ -35,7 +35,7 @@ import {
 	Underline as UnderlineIcon,
 	type LucideIcon
 } from "lucide-react";
-import * as React from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -95,7 +95,7 @@ function ToolbarToggleButton({
 	);
 }
 
-const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
+const EditorToolbar = memo(({ editor }: EditorToolbarProps) => {
 	const { t } = useTranslation();
 	const state = useEditorState({
 		editor,
@@ -255,18 +255,18 @@ function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) 
 	const editorLabel = t("content.editor.label");
 
 	// Track the last value we sent to the form to avoid unnecessary syncs
-	const lastValueRef = React.useRef(value);
+	const lastValueRef = useRef(value);
 	// Stable callback refs to avoid re-creating the editor
-	const onChangeRef = React.useRef(onChange);
-	const onBlurRef = React.useRef(onBlur);
+	const onChangeRef = useRef(onChange);
+	const onBlurRef = useRef(onBlur);
 
 	// Keep refs up to date
-	React.useLayoutEffect(() => {
+	useLayoutEffect(() => {
 		onChangeRef.current = onChange;
 		onBlurRef.current = onBlur;
 	});
 
-	const getEditorAttributes = React.useCallback(
+	const getEditorAttributes = useCallback(
 		() => ({
 			class: cn(
 				"min-h-28 flex-1 py-2 font-serif leading-[1.8] outline-none",
@@ -293,7 +293,7 @@ function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) 
 	);
 
 	// compute initial content
-	const initialContent = React.useMemo(() => {
+	const initialContent = useMemo(() => {
 		if (!value) return createEmptyDoc();
 		return parseProseMirrorJson(value) ?? createEmptyDoc();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -334,7 +334,7 @@ function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) 
 		}
 	});
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (!editor) return;
 
 		editor.setOptions({
@@ -346,7 +346,7 @@ function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) 
 	}, [editor, getEditorAttributes, placeholder]);
 
 	// Update editor content only when value changes externally (e.g., form reset)
-	React.useEffect(() => {
+	useEffect(() => {
 		if (!editor) return;
 
 		// Skip if the value matches what we last sent (internal change)

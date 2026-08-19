@@ -11,6 +11,21 @@ export default defineConfig([
 	{
 		files: ["**/*.{ts,tsx}"],
 		rules: {
+			"no-restricted-syntax": [
+				"error",
+				{
+					selector: "ImportDeclaration[source.value='react'] > ImportDefaultSpecifier",
+					message: "Use named imports from React."
+				},
+				{
+					selector: "ImportDeclaration[source.value='react'] > ImportNamespaceSpecifier",
+					message: "Use named imports from React."
+				},
+				{
+					selector: "TSQualifiedName[left.name='React']",
+					message: "Import React types directly with `import type`."
+				}
+			],
 			"react-refresh/only-export-components": "off"
 		},
 		extends: [

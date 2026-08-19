@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import {
 	createContext,
 	useCallback,
@@ -25,7 +26,7 @@ const ThemeProviderContext = createContext<ThemeProviderState | null>(null);
 const getSystemTheme = (): Theme =>
 	window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export function ThemeProvider({ children }: { children: ReactNode }) {
 	// The stored value is only ever a manual override; absence means "follow
 	// the system". Legacy values like "system" fail validation and are ignored.
 	const [override, setOverride] = useState<Theme | null>(() => {

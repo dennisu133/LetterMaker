@@ -1,5 +1,5 @@
 import { Upload } from "lucide-react";
-import * as React from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useStamp } from "@/components/form-actions-provider";
@@ -8,15 +8,15 @@ import { cn } from "@/lib/utils";
 export function DropZone() {
 	const { t } = useTranslation();
 	const { stamp, uploadState, uploadStamp } = useStamp();
-	const [isDragging, setIsDragging] = React.useState(false);
-	const dragCounterRef = React.useRef(0);
+	const [isDragging, setIsDragging] = useState(false);
+	const dragCounterRef = useRef(0);
 
 	const isValidating = uploadState.status === "validating";
 
 	// Don't show drop zone if stamp is already uploaded or currently validating
 	const canDrop = !stamp.isValid && !isValidating;
 
-	React.useEffect(() => {
+	useEffect(() => {
 		const handleDragEnter = (e: DragEvent) => {
 			e.preventDefault();
 			e.stopPropagation();

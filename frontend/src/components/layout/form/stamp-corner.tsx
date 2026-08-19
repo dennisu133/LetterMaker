@@ -1,5 +1,6 @@
 import { AlertCircle, CheckCircle, Stamp } from "lucide-react";
-import * as React from "react";
+import type { ChangeEvent } from "react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useStamp } from "@/components/form-actions-provider";
@@ -26,12 +27,12 @@ export function StampCorner() {
 	const { t } = useTranslation();
 	const { stamp, uploadState, uploadStamp, clearStamp, clearError } = useStamp();
 
-	const fileInputRef = React.useRef<HTMLInputElement>(null);
+	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const isValidating = uploadState.status === "validating";
 	const hasError = uploadState.status === "error";
 
-	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (!file) return;
 

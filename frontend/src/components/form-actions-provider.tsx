@@ -1,4 +1,5 @@
-import * as React from "react";
+import type { ReactNode } from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 
 import { validateStamp, type StampValidationResult } from "@/lib/validateStamp";
 
@@ -6,13 +7,13 @@ type FormActions = {
 	fillExample: () => void;
 };
 
-const FormActionsContext = React.createContext<FormActions | null>(null);
+const FormActionsContext = createContext<FormActions | null>(null);
 
 type FormActionsRegisterContext = {
 	register: (actions: FormActions) => void;
 };
 
-const FormActionsRegisterContext = React.createContext<FormActionsRegisterContext | null>(null);
+const FormActionsRegisterContext = createContext<FormActionsRegisterContext | null>(null);
 
 // Stamp state management
 type StampState = {
@@ -34,18 +35,18 @@ type StampContext = {
 	clearError: () => void;
 };
 
-const StampContext = React.createContext<StampContext | null>(null);
+const StampContext = createContext<StampContext | null>(null);
 
-export function FormActionsProvider({ children }: { children: React.ReactNode }) {
-	const [actions, setActions] = React.useState<FormActions | null>(null);
-	const [stamp, setStampState] = React.useState<StampState>({ file: null, isValid: false });
-	const [uploadState, setUploadState] = React.useState<StampUploadState>({ status: "idle" });
+export function FormActionsProvider({ children }: { children: ReactNode }) {
+	const [actions, setActions] = useState<FormActions | null>(null);
+	const [stamp, setStampState] = useState<StampState>({ file: null, isValid: false });
+	const [uploadState, setUploadState] = useState<StampUploadState>({ status: "idle" });
 
-	const register = React.useCallback((newActions: FormActions) => {
+	const register = useCallback((newActions: FormActions) => {
 		setActions(newActions);
 	}, []);
 
-	const uploadStamp = React.useCallback(async (file: File) => {
+	const uploadStamp = useCallback(async (file: File) => {
 		setUploadState({ status: "validating" });
 
 		const result = await validateStamp(file);
@@ -58,12 +59,12 @@ export function FormActionsProvider({ children }: { children: React.ReactNode })
 		}
 	}, []);
 
-	const clearStamp = React.useCallback(() => {
+	const clearStamp = useCallback(() => {
 		setStampState({ file: null, isValid: false });
 		setUploadState({ status: "idle" });
 	}, []);
 
-	const clearError = React.useCallback(() => {
+	const clearError = useCallback(() => {
 		setUploadState({ status: "idle" });
 	}, []);
 
@@ -77,12 +78,12 @@ export function FormActionsProvider({ children }: { children: React.ReactNode })
 }
 
 export function useFormActions() {
-	const context = React.useContext(FormActionsContext);
+	const context = useContext(FormActionsContext);
 	return context;
 }
 
 export function useFormActionsRegister() {
-	const context = React.useContext(FormActionsRegisterContext);
+	const context = useContext(FormActionsRegisterContext);
 	if (!context) {
 		throw new Error("useFormActionsRegister must be used within a FormActionsProvider");
 	}
@@ -90,7 +91,7 @@ export function useFormActionsRegister() {
 }
 
 export function useStamp() {
-	const context = React.useContext(StampContext);
+	const context = useContext(StampContext);
 	if (!context) {
 		throw new Error("useStamp must be used within a FormActionsProvider");
 	}
