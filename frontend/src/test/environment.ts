@@ -56,3 +56,4 @@ class ResizeObserverMock implements ResizeObserver {
 globalThis.ResizeObserver = ResizeObserverMock;
 
 Element.prototype.scrollIntoView = vi.fn();
+window.scrollTo = vi.fn();

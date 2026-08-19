@@ -19,6 +19,24 @@ test("creates a new paragraph when pressing Enter in the editor", async ({ page 
 	await expect(editor.locator("p").nth(1)).toHaveText("Second paragraph");
 });
 
+test("keeps the viewport at the bottom while the letter grows", async ({ page }) => {
+	await page.setViewportSize({ width: 1280, height: 500 });
+	await page.locator("#content").click();
+
+	for (let line = 0; line < 30; line++) {
+		await page.keyboard.type("Another line");
+		await page.keyboard.press("Enter");
+	}
+
+	await expect
+		.poll(() =>
+			page.evaluate(
+				() => document.documentElement.scrollHeight - window.innerHeight - window.scrollY
+			)
+		)
+		.toBeLessThan(2);
+});
+
 test("keeps the toolbar in sync with keyboard formatting", async ({ page }) => {
 	await page.locator("#content").click();
 	const bold = page.getByRole("button", { name: "Bold" });

@@ -324,6 +324,10 @@ function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) 
 			const json = JSON.stringify(editor.getJSON());
 			lastValueRef.current = json;
 			onChangeRef.current(json);
+
+			if (editor.state.selection.to === editor.state.doc.content.size - 1) {
+				requestAnimationFrame(() => window.scrollTo(0, document.documentElement.scrollHeight));
+			}
 		},
 		onBlur: () => {
 			onBlurRef.current();
