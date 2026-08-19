@@ -51,11 +51,13 @@ export function StampCorner() {
 	if (stamp.isValid) {
 		return (
 			<div className="border-paper-line bg-paper-foreground/3 w-full shrink-0 rounded-xs border p-3 text-center sm:w-48 sm:rotate-1">
-				<p className="flex items-center justify-center gap-1.5 text-sm font-medium text-green-800 dark:text-green-900">
+				<p className="flex items-center justify-center gap-1.5 font-medium text-green-800 dark:text-green-900">
 					<CheckCircle className="size-4 shrink-0" aria-hidden="true" />
 					{t("stamp.success.title")}
 				</p>
-				<p className="text-paper-muted mt-1 leading-snug">{t("stamp.success.description")}</p>
+				<p className="text-paper-muted mt-1 text-xs leading-snug">
+					{t("stamp.success.description")}
+				</p>
 				<Button
 					variant="ghost"
 					size="sm"
