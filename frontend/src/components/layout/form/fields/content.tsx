@@ -67,7 +67,10 @@ export function DetailsSection() {
 											type="button"
 											variant="ghost"
 											size="icon-xs"
-											className={cn(quietControl, "absolute top-1/2 -right-1 -translate-y-1/2")}
+											className={cn(
+												quietControl,
+												"absolute top-1/2 -right-1 hidden -translate-y-1/2 supports-[selector(input::-webkit-calendar-picker-indicator)]:inline-flex"
+											)}
 											aria-label={t("content.date.tooltip")}
 											onClick={() =>
 												(document.getElementById("date") as HTMLInputElement).showPicker()
