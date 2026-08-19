@@ -78,7 +78,7 @@ export function FreeFormCombobox({
 									key={item}
 									value={item}
 									data-slot="combobox-item"
-									className="data-highlighted:bg-accent data-highlighted:text-accent-foreground relative flex cursor-default items-center py-2 pr-8 pl-2 outline-hidden select-none"
+									className="data-highlighted:bg-accent data-highlighted:text-accent-foreground relative flex cursor-pointer items-center py-2 pr-8 pl-2 outline-hidden select-none"
 								>
 									{item}
 									<ComboboxPrimitive.ItemIndicator

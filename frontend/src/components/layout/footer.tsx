@@ -7,7 +7,7 @@ export function Footer() {
 					href="https://dennisu.com"
 					target="_blank"
 					rel="noopener noreferrer"
-					className="hover:text-foreground underline underline-offset-2"
+					className="hover:text-foreground cursor-pointer underline underline-offset-2"
 				>
 					Dennisu
 				</a>

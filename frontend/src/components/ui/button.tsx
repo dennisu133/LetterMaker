@@ -3,7 +3,7 @@ import { Button as ButtonPrimitive } from "@base-ui/react/button";
 import { cn } from "@/lib/utils";
 
 const buttonClassName =
-	"focus-visible:border-ring focus-visible:ring-ring/50 rounded-none border border-transparent bg-clip-padding font-medium focus-visible:ring-1 inline-flex items-center justify-center whitespace-nowrap transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none select-none";
+	"focus-visible:border-ring focus-visible:ring-ring/50 cursor-pointer rounded-none border border-transparent bg-clip-padding font-medium focus-visible:ring-1 inline-flex items-center justify-center whitespace-nowrap transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none select-none";
 
 const buttonVariants = {
 	default: "bg-primary text-primary-foreground",
