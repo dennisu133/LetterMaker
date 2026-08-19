@@ -38,11 +38,7 @@ export function FormActions() {
 				<PopoverTrigger
 					render={
 						<Button className="relative z-10 min-w-32" type="submit" disabled={isSubmitting}>
-							{isSubmitting ? (
-								<Spinner className="mr-1" />
-							) : (
-								<Send className="size-4" aria-hidden="true" />
-							)}
+							{isSubmitting ? <Spinner /> : <Send className="size-4" aria-hidden="true" />}
 							{t("button.submit")}
 						</Button>
 					}

@@ -116,7 +116,7 @@ function LetterFormContent() {
 						{!stamp.isValid && (
 							<div className="flex flex-1 flex-col gap-4 md:flex-row md:gap-10">
 								<AddressSection kind="sender" className="flex-1 md:max-w-xs" />
-								<AddressSection kind="recipient" className="flex-1 md:max-w-sm" />
+								<AddressSection kind="recipient" className="flex-1" />
 							</div>
 						)}
 						<StampCorner />

@@ -1,5 +1,5 @@
 import { CalendarIcon } from "lucide-react";
-import * as React from "react";
+import { useMemo } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -18,6 +18,10 @@ import { cn } from "@/lib/utils";
 
 const MAX_SUBJECT_LINES = 5;
 
+function limitSubjectLines(value: string) {
+	return value.split("\n").slice(0, MAX_SUBJECT_LINES).join("\n");
+}
+
 export function DetailsSection() {
 	const {
 		control,
@@ -28,21 +32,12 @@ export function DetailsSection() {
 	const { language: formalitiesLanguage } = useFormalities();
 
 	// Get salutations from the formalities language locale
-	const salutations = React.useMemo(() => {
+	const salutations = useMemo(() => {
 		return i18n.t("content.salutation.list", {
 			lng: formalitiesLanguage,
 			returnObjects: true
 		}) as string[];
 	}, [i18n, formalitiesLanguage]);
-
-	// Limit subject to max lines
-	const limitSubjectLines = (value: string) => {
-		const lines = value.split("\n");
-		if (lines.length <= MAX_SUBJECT_LINES) {
-			return value;
-		}
-		return lines.slice(0, MAX_SUBJECT_LINES).join("\n");
-	};
 
 	return (
 		<div className="mt-5 flex flex-col gap-4 sm:mt-7 sm:gap-5">
@@ -91,10 +86,7 @@ export function DetailsSection() {
 							onBlur={field.onBlur}
 							aria-invalid={!!fieldState.error}
 							aria-describedby={fieldState.error ? "subject-error" : undefined}
-							className={cn(
-								inkInput,
-								"resize-none text-[1.14rem] leading-snug font-semibold md:text-[1.14rem]"
-							)}
+							className={cn(inkInput, "resize-none text-lg leading-snug font-semibold")}
 						/>
 					)}
 				/>

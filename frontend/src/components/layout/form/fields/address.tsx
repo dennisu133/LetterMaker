@@ -34,17 +34,17 @@ export function AddressSection({ kind, className }: AddressSectionProps) {
 	return (
 		<fieldset
 			className={cn(
-				"m-0 flex flex-col gap-1 border-0 bg-transparent p-0",
+				"flex flex-col gap-1",
 				// The recipient block mimics the envelope's address window
 				isRecipient &&
-					"bg-paper-foreground/2 border-paper-line max-w-sm gap-1 rounded-xs border border-solid p-3 sm:p-4",
+					"bg-paper-foreground/2 border-paper-line max-w-sm rounded-xs border p-3 sm:p-4",
 				className
 			)}
 		>
-			<legend className="text-paper-muted float-left mb-2 w-full p-0 text-[clamp(1.125rem,1.08rem+0.19vw,1.25rem)] font-medium tracking-[0.08em] uppercase">
+			<legend className="text-paper-muted float-left mb-2 w-full text-[clamp(1.125rem,1.08rem+0.19vw,1.25rem)] font-medium tracking-[0.08em] uppercase">
 				{t(`contact.${kind}`)}
 			</legend>
-			<div className={cn("flex w-full flex-col gap-2", isRecipient && "gap-3")}>
+			<div className={cn("flex flex-col gap-2", isRecipient && "gap-3")}>
 				<Field data-invalid={!!nameError}>
 					<label htmlFor={nameField} className="sr-only">
 						{t("contact.name.label")}
@@ -54,12 +54,7 @@ export function AddressSection({ kind, className }: AddressSectionProps) {
 						id={nameField}
 						maxLength={MAX_INPUT}
 						placeholder={t("contact.name.placeholder")}
-						className={cn(
-							inkInput,
-							isRecipient
-								? "text-[1.05rem] font-medium md:text-[1.05rem]"
-								: "text-[0.95rem] md:text-[0.95rem]"
-						)}
+						className={cn(inkInput, isRecipient ? "text-[1.05rem] font-medium" : "text-[0.95rem]")}
 						aria-invalid={!!nameError}
 						aria-describedby={nameError ? nameErrorId : undefined}
 						{...register(nameField)}
@@ -79,9 +74,7 @@ export function AddressSection({ kind, className }: AddressSectionProps) {
 						className={cn(
 							inkInput,
 							"resize-none leading-relaxed",
-							isRecipient
-								? "text-[1.05rem] md:text-[1.05rem]"
-								: "min-h-0 text-[0.95rem] md:text-[0.95rem]"
+							isRecipient ? "text-[1.05rem]" : "min-h-0 text-[0.95rem]"
 						)}
 						aria-invalid={!!addressError}
 						aria-describedby={addressError ? addressErrorId : undefined}

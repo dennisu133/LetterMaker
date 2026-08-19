@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -21,13 +21,13 @@ export function ClosingSection() {
 		formState: { errors }
 	} = useFormContext<FormValues>();
 	// Track whether signature is linked to senderName
-	const isSignatureLinkedRef = React.useRef(true);
+	const isSignatureLinkedRef = useRef(true);
 
 	const { i18n, t } = useTranslation();
 	const { language: formalitiesLanguage } = useFormalities();
 
 	// Get closings from the formalities language locale
-	const closings = React.useMemo(() => {
+	const closings = useMemo(() => {
 		return i18n.t("content.closing.list", {
 			lng: formalitiesLanguage,
 			returnObjects: true
@@ -37,7 +37,7 @@ export function ClosingSection() {
 	// Subscribe to senderName changes and sync to signature when linked.
 	// A form reset fires the subscription without a field name; it re-links
 	// the signature so the next example fill syncs again.
-	React.useEffect(() => {
+	useEffect(() => {
 		const subscription = watch((value, { name }) => {
 			if (!name) {
 				isSignatureLinkedRef.current = true;
@@ -51,7 +51,7 @@ export function ClosingSection() {
 	}, [watch, setValue]);
 
 	return (
-		<div className="mt-auto grid grid-cols-1 items-end gap-4 pt-5 sm:grid-cols-[3fr_2fr_auto] sm:gap-8 sm:pt-6">
+		<div className="mt-auto grid items-end gap-4 pt-5 sm:grid-cols-[3fr_2fr_auto] sm:gap-8 sm:pt-6">
 			<Field data-invalid={!!errors.closing}>
 				<label htmlFor="closing" className="sr-only">
 					{t("content.closing.label")}
@@ -68,7 +68,7 @@ export function ClosingSection() {
 								onValueChange={field.onChange}
 								id="closing"
 								maxLength={MAX_INPUT}
-								className={cn(inkInput, "flex-1 text-[1.05rem] md:text-[1.05rem]")}
+								className={cn(inkInput, "flex-1")}
 								placeholder={t("content.closing.placeholder")}
 								onBlur={field.onBlur}
 								triggerAriaLabel={t("content.closing.label")}
@@ -103,10 +103,7 @@ export function ClosingSection() {
 							onBlur={field.onBlur}
 							aria-invalid={!!fieldState.error}
 							aria-describedby={fieldState.error ? "signature-error" : undefined}
-							className={cn(
-								inkInput,
-								"font-signature text-[1.6rem] leading-tight font-medium md:text-[1.6rem]"
-							)}
+							className={cn(inkInput, "font-signature text-2xl leading-tight font-medium")}
 						/>
 					)}
 				/>
