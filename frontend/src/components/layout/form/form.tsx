@@ -24,7 +24,7 @@ const ContentSection = lazy(async () => {
 function LetterFormContent() {
 	const { t } = useTranslation();
 	const { register: registerActions } = useFormActionsRegister();
-	const { stamp } = useStamp();
+	const { stamp, clearStamp } = useStamp();
 	const { setSubmitting, setError } = useSubmission();
 
 	const form = useForm<FormValues>({
@@ -49,6 +49,11 @@ function LetterFormContent() {
 	// Register form actions for the navbar
 	useEffect(() => {
 		registerActions({
+			resetForm: () => {
+				form.reset();
+				clearStamp();
+				setError(null);
+			},
 			fillExample: () => {
 				const commonValues = {
 					date: todayLocalDate(),
@@ -76,7 +81,7 @@ function LetterFormContent() {
 				form.reset(values, { keepDefaultValues: true });
 			}
 		});
-	}, [registerActions, form, t, stamp.isValid, stamp.file]);
+	}, [registerActions, form, t, stamp.isValid, stamp.file, clearStamp, setError]);
 
 	const onSubmit = useCallback(
 		async (data: FormValues) => {

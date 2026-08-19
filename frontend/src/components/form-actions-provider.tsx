@@ -5,6 +5,7 @@ import { validateStamp, type StampValidationResult } from "@/lib/validateStamp";
 
 type FormActions = {
 	fillExample: () => void;
+	resetForm: () => void;
 };
 
 const FormActionsContext = createContext<FormActions | null>(null);

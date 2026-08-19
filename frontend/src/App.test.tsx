@@ -91,6 +91,16 @@ describe("LetterMaker", () => {
 		expect(screen.getByRole("textbox", { name: "Letter content" })).toHaveTextContent("");
 	});
 
+	it("resets the letter from the title", async () => {
+		const user = userEvent.setup();
+		render(<App />);
+
+		await user.click(screen.getByRole("button", { name: "Example" }));
+		await user.click(screen.getByRole("button", { name: "LetterMaker" }));
+
+		expect(screen.getByRole("textbox", { name: "Subject *" })).toHaveValue("");
+	});
+
 	it("submits a complete letter and opens the PDF", async () => {
 		const user = userEvent.setup();
 		const pdf = new Blob(["pdf"], { type: "application/pdf" });

@@ -1,8 +1,7 @@
 import { AlertCircle, Send } from "lucide-react";
-import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import { useStamp } from "@/components/form-actions-provider";
+import { useFormActions } from "@/components/form-actions-provider";
 import { useSubmission } from "@/components/submission-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,8 +18,7 @@ import { cn } from "@/lib/utils";
 
 /** Submit/reset controls in the letter's bottom corner. */
 export function FormActions() {
-	const { reset } = useFormContext();
-	const { clearStamp } = useStamp();
+	const formActions = useFormActions();
 	const { isSubmitting, error, setError } = useSubmission();
 	const { t } = useTranslation();
 
@@ -60,11 +58,7 @@ export function FormActions() {
 				type="button"
 				className={quietControl}
 				disabled={isSubmitting}
-				onClick={() => {
-					reset();
-					clearStamp();
-					setError(null);
-				}}
+				onClick={() => formActions?.resetForm()}
 			>
 				{t("button.reset")}
 			</Button>
