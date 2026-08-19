@@ -40,7 +40,7 @@ export function FormalitiesProvider({ children }: { children: ReactNode }) {
 	);
 }
 
-export const useFormalities = () => {
+export function useFormalities() {
 	const context = useContext(FormalitiesProviderContext);
 
 	if (!context) {
@@ -48,4 +48,4 @@ export const useFormalities = () => {
 	}
 
 	return context;
-};
+}
