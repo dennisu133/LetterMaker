@@ -40,10 +40,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
-	--text-xl: clamp(1.125rem, 1.08rem + 0.19vw, 1.25rem);
-}
-
 :root {
 	color-scheme: light;
 
