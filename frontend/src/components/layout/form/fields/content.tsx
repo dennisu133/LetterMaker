@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { Formalities } from "@/components/common/formalities";
 import { useFormalities } from "@/components/formalities-provider";
+import { Button } from "@/components/ui/button";
 import { FreeFormCombobox } from "@/components/ui/combobox";
 import { Field, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -59,7 +60,27 @@ export function DetailsSection() {
 								aria-invalid={!!fieldState.error}
 								aria-describedby={fieldState.error ? "date-error" : undefined}
 							/>
-							<CalendarIcon className="text-paper-muted pointer-events-none absolute top-1/2 right-0 size-4 -translate-y-1/2 opacity-60 transition-opacity group-hover:opacity-100" />
+							<Tooltip>
+								<TooltipTrigger
+									render={
+										<Button
+											type="button"
+											variant="ghost"
+											size="icon-xs"
+											className={cn(quietControl, "absolute top-1/2 -right-1 -translate-y-1/2")}
+											aria-label={t("content.date.tooltip")}
+											onClick={() =>
+												(document.getElementById("date") as HTMLInputElement).showPicker()
+											}
+										/>
+									}
+								>
+									<CalendarIcon className="size-4" />
+								</TooltipTrigger>
+								<TooltipContent>
+									<p>{t("content.date.tooltip")}</p>
+								</TooltipContent>
+							</Tooltip>
 						</div>
 					)}
 				/>

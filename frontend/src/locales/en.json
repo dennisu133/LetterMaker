@@ -85,7 +85,8 @@
 	"content": {
 		"title": "Content",
 		"date": {
-			"label": "Date"
+			"label": "Date",
+			"tooltip": "Show date picker"
 		},
 		"subject": {
 			"label": "Subject",
