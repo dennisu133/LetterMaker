@@ -1,36 +1,15 @@
 import { vi } from "vitest";
 
-class MemoryStorage implements Storage {
-	readonly #store = new Map<string, string>();
-
-	get length() {
-		return this.#store.size;
-	}
-
-	clear() {
-		this.#store.clear();
-	}
-
-	getItem(key: string) {
-		return this.#store.get(key) ?? null;
-	}
-
-	key(index: number) {
-		return [...this.#store.keys()][index] ?? null;
-	}
-
-	removeItem(key: string) {
-		this.#store.delete(key);
-	}
-
-	setItem(key: string, value: string) {
-		this.#store.set(key, String(value));
-	}
-}
+const storage = new Map<string, string>();
 
 Object.defineProperty(window, "localStorage", {
 	configurable: true,
-	value: new MemoryStorage()
+	value: {
+		clear: () => storage.clear(),
+		getItem: (key: string) => storage.get(key) ?? null,
+		removeItem: (key: string) => storage.delete(key),
+		setItem: (key: string, value: string) => storage.set(key, String(value))
+	}
 });
 
 Object.defineProperty(window, "matchMedia", {
@@ -38,12 +17,8 @@ Object.defineProperty(window, "matchMedia", {
 	value: vi.fn().mockImplementation((query: string) => ({
 		matches: false,
 		media: query,
-		onchange: null,
 		addEventListener: vi.fn(),
-		removeEventListener: vi.fn(),
-		addListener: vi.fn(),
-		removeListener: vi.fn(),
-		dispatchEvent: vi.fn()
+		removeEventListener: vi.fn()
 	}))
 });
 
