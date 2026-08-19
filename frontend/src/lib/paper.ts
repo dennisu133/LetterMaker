@@ -21,4 +21,4 @@ export const inkSurface =
 
 /** Quiet icon/toggle controls that sit directly on the paper. */
 export const quietControl =
-	"text-paper-muted hover:bg-paper-foreground/10 hover:text-paper-foreground dark:hover:bg-paper-foreground/10 aria-pressed:bg-paper-foreground/15 aria-pressed:text-paper-foreground data-[state=on]:bg-paper-foreground/15 data-[state=on]:text-paper-foreground aria-expanded:bg-paper-foreground/10 aria-expanded:text-paper-foreground";
+	"text-paper-muted hover:bg-paper-foreground/10 hover:text-paper-foreground dark:hover:bg-paper-foreground/10 aria-pressed:bg-paper-foreground/15 aria-pressed:text-paper-foreground aria-expanded:bg-paper-foreground/10 aria-expanded:text-paper-foreground";

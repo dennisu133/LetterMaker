@@ -42,20 +42,17 @@ import { useTranslation } from "react-i18next";
 const toolbarClass =
 	"border-paper-line flex flex-wrap items-center gap-1 border-b py-1 opacity-80 transition-opacity group-focus-within/editor:opacity-100";
 const toolbarDropdownButtonClass = cn(
-	"h-[clamp(1.5rem,1.25rem+0.75vw,1.75rem)] gap-1 px-[clamp(0.25rem,0.125rem+0.375vw,0.5rem)]",
+	"h-[clamp(1.5rem,1.25rem+0.75vw,1.75rem)] px-[clamp(0.25rem,0.125rem+0.375vw,0.5rem)]",
 	quietControl
 );
 const toolbarIconClass = "size-[clamp(0.875rem,0.75rem+0.375vw,1rem)]";
 const toolbarChevronClass = "size-[clamp(0.625rem,0.5rem+0.375vw,0.75rem)]";
-const toolbarSeparatorClass = cn(
-	"mx-[clamp(0,0.0625vw,0.125rem)] my-auto h-[clamp(1.25rem,1rem+0.75vw,1.5rem)]",
-	"bg-paper-line"
-);
+const toolbarSeparatorClass =
+	"bg-paper-line mx-[clamp(0,0.0625vw,0.125rem)] my-auto h-[clamp(1.25rem,1rem+0.75vw,1.5rem)]";
 const toolbarSquareButtonClass = cn(
 	"size-[clamp(1.5rem,1.25rem+0.75vw,1.75rem)] p-0",
 	quietControl
 );
-const toolbarToggleClass = quietControl;
 
 interface EditorToolbarProps {
 	editor: Editor;
@@ -81,7 +78,7 @@ function ToolbarToggleButton({
 			<TooltipTrigger
 				render={
 					<Toggle
-						className={toolbarToggleClass}
+						className={quietControl}
 						size="sm-responsive"
 						aria-label={label}
 						pressed={active}
@@ -146,7 +143,7 @@ const EditorToolbar = React.memo(({ editor }: EditorToolbarProps) => {
 						<p>{t("content.editor.text_style")}</p>
 					</TooltipContent>
 				</Tooltip>
-				<DropdownMenuContent align="start">
+				<DropdownMenuContent>
 					<DropdownMenuItem onClick={() => editor.chain().focus().setParagraph().run()}>
 						<Pilcrow className="size-4" />
 						{t("content.editor.paragraph")}
@@ -272,10 +269,10 @@ function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) 
 	const getEditorAttributes = React.useCallback(
 		() => ({
 			class: cn(
-				"min-h-28 max-w-none flex-1 py-2 font-serif text-[1.02rem] leading-[1.8] outline-none",
+				"min-h-28 flex-1 py-2 font-serif leading-[1.8] outline-none",
 				"[&_h1]:text-xl [&_h1]:font-bold [&_h1]:leading-snug",
-				"[&_h2]:text-sm [&_h2]:font-bold [&_h2]:leading-snug",
-				"[&_h3]:text-xs [&_h3]:font-semibold [&_h3]:leading-snug",
+				"[&_h2]:text-lg [&_h2]:font-bold [&_h2]:leading-snug",
+				"[&_h3]:text-base [&_h3]:font-semibold [&_h3]:leading-snug",
 				"[&_ul]:list-disc [&_ul]:pl-5",
 				"[&_ol]:list-decimal [&_ol]:pl-5",
 				"[&_blockquote]:border-l-2 [&_blockquote]:border-paper-line [&_blockquote]:pl-3 [&_blockquote]:italic",
@@ -320,7 +317,6 @@ function TipTapEditor({ value, onChange, onBlur, hasError }: TipTapEditorProps) 
 			})
 		],
 		content: initialContent,
-		immediatelyRender: true,
 		editorProps: {
 			attributes: getEditorAttributes()
 		},
@@ -385,10 +381,7 @@ export function ContentSection() {
 	const hasError = !!errors.content;
 
 	return (
-		<Field
-			className="group/editor mt-5 flex min-h-0 flex-1 flex-col gap-1 sm:mt-6"
-			data-invalid={hasError}
-		>
+		<Field className="group/editor mt-5 min-h-0 flex-1 sm:mt-6" data-invalid={hasError}>
 			<label htmlFor="content" className="sr-only">
 				{t("content.editor.label") + "\u2009*"}
 			</label>
